@@ -24,23 +24,14 @@ export default function DetailCvPage() {
                   <strong>Họ và tên:</strong> Lê Phúc
                 </p>
                 <p>
-                  <strong>CV:</strong> CV-LEVANPHUC-JAVA-BACKEND.pdf
-                </p>
-                <p>
-                  <strong>Địa chỉ:</strong> Thủ Đức, Thành Phố Thủ Đức, Hồ Chí
-                  Minh, Việt Nam
-                </p>
-                <p>
                   <strong>Điện thoại:</strong> 0814201800
                 </p>
                 <p>
                   <strong>E-mail:</strong> levanphuc181101@gmail.com
                 </p>
                 <p>
-                  <strong>Giới tính:</strong> Nam
-                </p>
-                <p>
-                  <strong>Ngày sinh:</strong> 18/11/2001
+                  <strong>Địa chỉ:</strong> Thủ Đức, Thành Phố Thủ Đức, Hồ Chí
+                  Minh, Việt Nam
                 </p>
               </div>
             </div>
@@ -53,9 +44,6 @@ export default function DetailCvPage() {
                 Bưu chính Viễn thông - Phía Nam
               </p>
               <p>
-                <strong>Trình độ học vấn:</strong> Cử nhân
-              </p>
-              <p>
                 <strong>Ngoại ngữ:</strong> Tiếng Anh - Trung cấp
               </p>
             </div>
@@ -66,12 +54,6 @@ export default function DetailCvPage() {
               <p>
                 <strong>Tổng số năm kinh nghiệm làm việc:</strong> 0 năm
               </p>
-            </div>
-
-            {/* Người tham khảo */}
-            <div className="border border-gray-300 p-4 rounded-md">
-              <h4 className="font-bold text-lg mb-2">Người tham khảo</h4>
-              <p>Chưa có thông tin người tham khảo.</p>
             </div>
 
             {/* Mục tiêu nghề nghiệp */}
@@ -107,7 +89,7 @@ export default function DetailCvPage() {
               <h4 className="font-bold text-lg mb-2">Tập tin đính kèm</h4>
               <PdfViewer
                 url={
-                  "https://res.cloudinary.com/dknwov2xw/raw/upload/v1727092456/cvs/CV-LEVANPHUC-JAVA-BACKEND_2ba79bbb-09d1-44ee-95d9-707ea75909a0"
+                  "https://res.cloudinary.com/dknwov2xw/raw/upload/v1727878914/cvs/CV-LEVANPHUC-JAVA-BACKEND_016d5eae-b910-4d96-b617-f6184295a31f"
                 }
               />
             </div>
