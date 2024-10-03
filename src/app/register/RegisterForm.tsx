@@ -1,4 +1,117 @@
-export default function Example() {
+"use client";
+
+import React, { useState } from "react";
+import {
+  CandidateCreateBodyType,
+  RegisterAccountBodyType,
+} from "@/app/schemaValidations/candidate.schema";
+import authApiRequest from "@/app/apiRequest/auth";
+import candidateApiRequest from "@/app/apiRequest/candidate";
+import { useRouter } from "next/navigation";
+import Alert from "@/components/Alert";
+
+export default function RegisterForm() {
+  const [formData, setFormData] = useState({
+    username: "",
+    password: "",
+    email: "",
+    fullName: "",
+    phone: "",
+    address: "",
+    gender: "",
+    birthday: "",
+    avatar: "",
+  });
+
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+  const validateForm = () => {
+    const {
+      username,
+      password,
+      fullName,
+      email,
+      phone,
+      address,
+      birthday,
+    } = formData;
+    const formErrors: { [key: string]: string } = {};
+
+    if (!username) formErrors.userName = "Tên người dùng không được để trống.";
+    if (!password || password.length < 3)
+      formErrors.password = "Mật khẩu phải có ít nhất 3 ký tự.";
+    if (!fullName) formErrors.fullName = "Tên không được để trống.";
+    if (!email) formErrors.email = "Email không được để trống.";
+    if (!phone) formErrors.phone = "Số điện thoại không được để trống.";
+    if (!address) formErrors.address = "Địa chỉ không được để trống.";
+
+    // if (!gender) formErrors.gender = "Giới tính không được để trống.";
+    if (birthday === null)
+      formErrors.birthday = "Ngày sinh không được để trống.";
+
+    setErrors(formErrors);
+    return Object.keys(formErrors).length === 0;
+  };
+
+  const router = useRouter();
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    console.log("Click DK");
+
+    if (validateForm()) {
+      try {
+        const accountData: RegisterAccountBodyType = {
+          username: formData.username,
+          password: formData.password,
+          email: formData.email,
+          role: 3,
+        };
+
+        const response = await authApiRequest.register(accountData);
+
+        const CandidateData: CandidateCreateBodyType = {
+          fullName: formData.fullName,
+          address: formData.address,
+          gender: true,
+          phone: formData.phone,
+          birthday: formData.birthday,
+          avatar: formData.avatar, // Default avatar is null
+          username: formData.username,
+        };
+
+        const result = await candidateApiRequest.createCandidate(CandidateData);
+        // const customer = await customerApiRequest.customerClient(
+        //   response.payload.data.username
+        // );
+        // console.log("candidate: ", candidate);
+        await authApiRequest.auth({
+          sessionToken: response.payload.data.token,
+          username: response.payload.data.username,
+          userId: response.payload.data.userId,
+        });
+
+        Alert.success("Thành công!", result.payload.message);
+        router.push("/");
+        router.refresh();
+      } catch (error) {
+        console.error("Error creating candidate:", error);
+        Alert.error("Lỗi!", "Đã xảy ra lỗi khi tạo khách hàng.");
+      }
+    }
+  };
+
   return (
     <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8 bg-gray-100">
       <div className="flex sm:mx-auto sm:w-full sm:max-w-2xl">
@@ -7,7 +120,7 @@ export default function Example() {
             Đăng Ký Tài Khoản
           </h2>
           
-          <form action="#" method="POST" className="space-y-4">
+          <form onSubmit={handleSubmit} method="POST" className="space-y-4">
             <div className="flex items-center space-x-4">
               <label htmlFor="fullName" className="block text-sm font-medium leading-6 text-gray-900 w-1/3">
                 Họ và tên
@@ -16,10 +129,14 @@ export default function Example() {
                 id="fullName"
                 name="fullName"
                 type="text"
-                required
+                value={formData.fullName}
+                onChange={handleChange}
                 className="block w-2/3 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 placeholder="Nguyễn Văn A"
               />
+              {errors.fullName && (
+                <span className="text-red-500 text-sm">{errors.fullName}</span>
+              )}
             </div>
 
             <div className="flex items-center space-x-4">
@@ -30,10 +147,14 @@ export default function Example() {
                 id="username"
                 name="username"
                 type="text"
-                required
+                value={formData.username}
+                onChange={handleChange}
                 className="block w-2/3 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 placeholder="username123"
               />
+              {errors.username && (
+                <span className="text-red-500 text-sm">{errors.username}</span>
+              )}
             </div>
 
             <div className="flex items-center space-x-4">
@@ -44,10 +165,14 @@ export default function Example() {
                 id="email"
                 name="email"
                 type="email"
-                required
+                value={formData.email}
+                onChange={handleChange}
                 className="block w-2/3 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 placeholder="email@example.com"
               />
+              {errors.email && (
+                <span className="text-red-500 text-sm">{errors.email}</span>
+              )}
             </div>
 
             <div className="flex items-center space-x-4">
@@ -58,9 +183,13 @@ export default function Example() {
                 id="password"
                 name="password"
                 type="password"
-                required
+                value={formData.password}
+                onChange={handleChange}
                 className="block w-2/3 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
               />
+              {errors.password && (
+                <span className="text-red-500 text-sm">{errors.password}</span>
+              )}
             </div>
 
             <div className="flex items-center space-x-4">
@@ -71,10 +200,14 @@ export default function Example() {
                 id="address"
                 name="address"
                 type="text"
-                required
+                value={formData.address}
+                onChange={handleChange}
                 className="block w-2/3 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 placeholder="123 Đường ABC"
               />
+              {errors.address && (
+                <span className="text-red-500 text-sm">{errors.address}</span>
+              )}
             </div>
 
             <div className="flex items-center space-x-4">
@@ -85,10 +218,14 @@ export default function Example() {
                 id="phone"
                 name="phone"
                 type="text"
-                required
+                value={formData.phone}
+                onChange={handleChange}
                 className="block w-2/3 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 placeholder="0901234567"
               />
+              {errors.phone && (
+                <span className="text-red-500 text-sm">{errors.phone}</span>
+              )}
             </div>
 
             <div className="flex items-center space-x-4">
@@ -98,6 +235,8 @@ export default function Example() {
               <select
                 id="gender"
                 name="gender"
+                value={formData.gender}
+                onChange={handleChange}
                 className="block w-2/3 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
               >
                 <option value="male">Nam</option>
@@ -132,8 +271,13 @@ export default function Example() {
                 id="birthday"
                 name="birthday"
                 type="date"
+                value={formData.birthday}
+                onChange={handleChange}
                 className="block w-2/3 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
               />
+              {errors.birthday && (
+                <span className="text-red-500 text-sm">{errors.birthday}</span>
+              )}
             </div>
 
             <div>
