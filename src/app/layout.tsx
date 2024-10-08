@@ -35,7 +35,7 @@ export default function RootLayout({
 
   // Kiểm tra đường dẫn hiện tại
   const isHomePage = pathname === "/"; // Đường dẫn cho trang home
-  const isCandidatePage = pathname.startsWith("/candidate"); // Kiểm tra nếu đường dẫn bắt đầu bằng "/candidate"
+  const isCandidatePage = pathname.startsWith("/candidate") || pathname.startsWith("/admin"); // Kiểm tra nếu đường dẫn bắt đầu bằng "/candidate"
   const isJobsPage = pathname.startsWith("/jobs") ||pathname.startsWith("/test"); // Kiểm tra nếu đường dẫn bắt đầu bằng "/jobs"
   const isEmployerPage = pathname.startsWith("/employer"); // Kiểm tra nếu đường dẫn bắt đầu bằng "/jobs"
   const isLoginPage = pathname.startsWith("/login") || pathname.startsWith("/register"); // Kiểm tra nếu đường dẫn bắt đầu bằng "/jobs"

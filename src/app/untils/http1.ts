@@ -42,21 +42,16 @@ const request = async <Response>(
   url: string,
   options?: CustomOptions | undefined
 ) => {
-  const body =
-    options?.body instanceof FormData
-      ? options.body // Giữ nguyên body nếu là FormData
-      : options?.body
-      ? JSON.stringify(options.body)
-      : undefined;
-
-  // Tạo baseHeaders với header Authorization
-  const baseHeaders: Record<string, string> = {
+  const body = options?.body ? JSON.stringify(options.body) : undefined;
+  const baseHeaders = {
+    "Content-Type": "application/json",
     Authorization: clientSessionToken.value
       ? `Bearer ${clientSessionToken.value}`
       : "",
   };
+  // Nếu không truyền baseUrl (hoặc baseUrl = undefined) thì lấy từ envConfig.NEXT_PUBLIC_API_ENDPOINT
+  // Nếu truyền baseUrl thì lấy giá trị truyền vào, truyền vào '' thì đồng nghĩa với việc chúng ta gọi API đến Next.js Server
 
-  // Lấy baseUrl
   const baseUrl =
     options?.baseUrl === undefined
       ? envConfig.NEXT_PUBLIC_API_ENDPOINT
@@ -68,26 +63,15 @@ const request = async <Response>(
   console.log("URLF:", fullUrl);
   console.log("BaseRLF:", baseUrl);
 
-  // Kiểm tra nếu URL có chứa phần liên quan đến thêm, sửa hoặc xóa CV
-  const isCvApiUrl =
-    fullUrl.includes("/candidate/cvs") || fullUrl.includes("/candidate-cv");
-
-  // Nếu không phải là API CV, thêm Content-Type
-  if (!isCvApiUrl) {
-    baseHeaders["Content-Type"] = "application/json";
-  }
-
   const res = await fetch(fullUrl, {
     ...options,
     headers: {
       ...baseHeaders,
-      ...options?.headers, // Thêm các headers khác nếu có
+      ...options?.headers,
     },
     body,
     method,
   });
-
-  // Xử lý response
   const payload: Response = await res.json();
 
   const data = {
@@ -98,13 +82,21 @@ const request = async <Response>(
   if (!res.ok) {
     throw new HttpError(data);
   }
-
   if (typeof window !== "undefined") {
     if (["/user/login", "/user/register"].includes(url)) {
       clientSessionToken.value = (payload as LoginResType).data.token;
     }
   }
+  // if(typeof window !== 'undefined'){
+  // if(['/user/login','/user/register'].includes(url)) {
 
+  // const { token } = (payload as LoginResType).data
+  //   clientSessionToken.value = token
+  //   localStorage.setItem('sessionToken', token) // Ensure token is also saved in localStorage
+
+  // }else if('/user/logout'.includes(url)) {
+  //     clientSessionToken.value=''
+  // }}
   return data;
 };
 

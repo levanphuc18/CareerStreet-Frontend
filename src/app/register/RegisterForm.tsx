@@ -92,10 +92,7 @@ export default function RegisterForm() {
         };
 
         const result = await candidateApiRequest.createCandidate(CandidateData);
-        // const customer = await customerApiRequest.customerClient(
-        //   response.payload.data.username
-        // );
-        // console.log("candidate: ", candidate);
+
         await authApiRequest.auth({
           sessionToken: response.payload.data.token,
           username: response.payload.data.username,

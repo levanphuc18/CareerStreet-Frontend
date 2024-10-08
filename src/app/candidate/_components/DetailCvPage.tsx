@@ -1,7 +1,8 @@
 "use client";
+import { CvResType } from "@/app/schemaValidations/cv.schema";
 import PdfViewer from "@/components/PdfViewer";
 
-export default function DetailCvPage() {
+export default function DetailCvPage({ cv }: { cv: CvResType["data"] | null }) {
   return (
     <div className="relative flex min-h-screen flex-col bg-gray-50 p-6 sm:p-12">
       {/* Thêm div này để căn giữa hai cột */}
@@ -21,16 +22,16 @@ export default function DetailCvPage() {
                 <h4 className="font-bold text-lg mb-2">Thông tin liên hệ</h4>
                 {/* Thêm thông tin mới */}
                 <p>
-                  <strong>Họ và tên:</strong> Lê Phúc
+                  <strong>Họ và tên:</strong> {cv?.fullName}
                 </p>
                 <p>
-                  <strong>Điện thoại:</strong> 0814201800
+                  <strong>Điện thoại:</strong> {cv?.phone}
                 </p>
                 <p>
-                  <strong>E-mail:</strong> levanphuc181101@gmail.com
+                  <strong>E-mail:</strong> {cv?.email}
                 </p>
                 <p>
-                  <strong>Địa chỉ:</strong> Thủ Đức, Thành Phố Thủ Đức, Hồ Chí
+                  <strong>Địa chỉ:</strong> {cv?.address}
                   Minh, Việt Nam
                 </p>
               </div>
@@ -40,11 +41,10 @@ export default function DetailCvPage() {
             <div className="border border-gray-300 p-4 rounded-md">
               <h4 className="font-bold text-lg mb-2">Học vấn/Ngoại ngữ</h4>
               <p>
-                <strong>Tên trường (Bằng cấp cao nhất):</strong> HV Công Nghệ
-                Bưu chính Viễn thông - Phía Nam
+                <strong>Tên trường (Bằng cấp cao nhất):</strong> {cv?.school}
               </p>
               <p>
-                <strong>Ngoại ngữ:</strong> Tiếng Anh - Trung cấp
+                <strong>Ngoại ngữ:</strong> {cv?.language}
               </p>
             </div>
 
@@ -52,7 +52,8 @@ export default function DetailCvPage() {
             <div className="border border-gray-300 p-4 rounded-md">
               <h4 className="font-bold text-lg mb-2">Kinh nghiệm làm việc</h4>
               <p>
-                <strong>Tổng số năm kinh nghiệm làm việc:</strong> 0 năm
+                <strong>Tổng số năm kinh nghiệm làm việc:</strong>{" "}
+                {cv?.experience} năm
               </p>
             </div>
 
@@ -60,27 +61,23 @@ export default function DetailCvPage() {
             <div className="border border-gray-300 p-4 rounded-md">
               <h4 className="font-bold text-lg mb-2">Mục tiêu nghề nghiệp</h4>
               <p>
-                <strong>Vị trí mong muốn:</strong> Java Backend
+                <strong>Vị trí mong muốn:</strong> {cv?.title}
               </p>
               <p>
-                <strong>Mức lương gần đây nhất:</strong> 1,000,000 VND
+                <strong>Mức lương gần đây nhất:</strong> {cv?.currentSalary}
               </p>
               <p>
-                <strong>Mức lương mong muốn:</strong> 1,000,000 VND - 5,000,000
+                <strong>Mức lương mong muốn:</strong> {cv?.preferenceSalary}
                 VND
               </p>
               <p>
-                <strong>Cấp bậc mong muốn:</strong> Mới đi làm
+                <strong>Cấp bậc mong muốn:</strong> {cv?.level}
               </p>
               <p>
-                <strong>Loại công việc:</strong> Nhân viên toàn thời gian
+                <strong>Loại hình công việc:</strong> {cv?.positionType}
               </p>
               <p>
-                <strong>Ngành nghề mong muốn:</strong> CNTT - Phần mềm
-              </p>
-              <p>
-                <strong>Nơi làm việc ưa thích:</strong> Hồ Chí Minh - Tất cả
-                quận/huyện
+                <strong>Nơi làm việc ưa thích:</strong> {cv?.workLocation}
               </p>
             </div>
 
@@ -88,9 +85,7 @@ export default function DetailCvPage() {
             <div className=" p-4 rounded-md h-96">
               <h4 className="font-bold text-lg mb-2">Tập tin đính kèm</h4>
               <PdfViewer
-                url={
-                  "https://res.cloudinary.com/dknwov2xw/raw/upload/v1727878914/cvs/CV-LEVANPHUC-JAVA-BACKEND_016d5eae-b910-4d96-b617-f6184295a31f"
-                }
+                url={cv?.filePath || "https://default-url.com/default.pdf"} // Sử dụng cv?.filePath nếu có, nếu không sử dụng URL mặc định
               />
             </div>
           </div>

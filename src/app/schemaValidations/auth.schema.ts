@@ -1,4 +1,4 @@
-import z from 'zod'
+import z from "zod";
 
 export const RegisterBody = z
   .object({
@@ -7,95 +7,80 @@ export const RegisterBody = z
     email: z.string().email(),
     role: z.number().default(3),
   })
-  .strict()
-  
-  
-  export type RegisterBodyType = z.TypeOf<typeof RegisterBody>
-  
+  .strict();
 
-  export const RegisterRes = z.object({
+export type RegisterBodyType = z.TypeOf<typeof RegisterBody>;
+
+export const RegisterRes = z.object({
   data: z.object({
     token: z.string(),
     expiresAt: z.string(),
     username: z.string(),
     userId: z.number(),
-    })
-  ,
-  message: z.string()
-})
+  }),
+  message: z.string(),
+});
 
-export type RegisterResType = z.TypeOf<typeof RegisterRes>
+export type RegisterResType = z.TypeOf<typeof RegisterRes>;
 
 export const LoginBody = z
   .object({
     username: z.string(),
-    password: z.string().min(3).max(100)
+    password: z.string().min(3).max(100),
   })
-  .strict()
+  .strict();
 
-export type LoginBodyType = z.TypeOf<typeof LoginBody>
+export type LoginBodyType = z.TypeOf<typeof LoginBody>;
 
-export const LoginRes = RegisterRes
+export const LoginRes = RegisterRes;
 
-export type LoginResType = z.TypeOf<typeof LoginRes>
-
+export type LoginResType = z.TypeOf<typeof LoginRes>;
 
 // Định nghĩa schema cho CandidateRes
 export const CandidateRes = z.object({
-  
   data: z.object({
-      candidateId: z.number(),
-      fullName: z.string(),
-      address: z.string(),
-      phone: z.string(),
-      gender: z.boolean(),
-      avatar: z.string(),
-      username: z.string(),
-      birthday: z.string() // Sử dụng optional nếu giá trị có thể là null hoặc undefined
-    }),
-    message: z.string()
+    candidateId: z.number(),
+    fullName: z.string(),
+    address: z.string(),
+    phone: z.string(),
+    gender: z.boolean(),
+    avatar: z.string(),
+    username: z.string(),
+    birthday: z.string(), // Sử dụng optional nếu giá trị có thể là null hoặc undefined
+  }),
+  message: z.string(),
 });
 export type CandidateResType = z.infer<typeof CandidateRes>;
 
- 
 // Định nghĩa schema cho Employer
 export const EmployerRes = z.object({
   data: z.object({
-      id: z.number(),
-      fullName: z.string(),
-      address: z.string(),
-      company: z.string(),
-      gender: z.boolean(),
-      tax: z.string(),
-      phone: z.string(),
-      avatar: z.string(),
-      username: z.string(),
-    }),
-    message: z.string()
+    id: z.number(),
+    fullName: z.string(),
+    address: z.string(),
+    company: z.string(),
+    gender: z.boolean(),
+    tax: z.string(),
+    phone: z.string(),
+    avatar: z.string(),
+    username: z.string(),
+  }),
+  message: z.string(),
 });
 export type EmployerResType = z.infer<typeof EmployerRes>;
 
-// export const UserRes = z
-//   .object({
-//     data: z.object({
-//     username: z.string()
-//     }),
-//     message: z.string()
-//   })
-
-// export type UserResType = z.TypeOf<typeof UserRes>
-
 export const RoleRes = z
   .object({
-    data:z.number(),
-    message: z.string()
-  }).strict()
-  export type RoleResType = z.TypeOf<typeof RoleRes>
-
-  export const MessageRes = z
-  .object({
-    message: z.string()
+    data: z.number(),
+    message: z.string(),
   })
-  .strict()
+  .strict();
+export type RoleResType = z.TypeOf<typeof RoleRes>;
 
-export type MessageResType = z.TypeOf<typeof MessageRes>
+export const MessageRes = z
+  .object({
+    message: z.string(),
+  })
+  .strict();
+
+export type MessageResType = z.TypeOf<typeof MessageRes>;
