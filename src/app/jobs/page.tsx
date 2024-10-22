@@ -1,11 +1,13 @@
-import JobsPage from './_components/JobsPage';
+// import { JobProvider } from "../context/JobContext";
+import JobsPage from "./_components/JobsPage";
 
-export default async function Jos(){
-    return (
-        <div>
-            {/* <Header /> */}
-            <JobsPage />
-            {/* <Footer /> */}
-        </div>
-    );
+export default async function Jobs() {
+  return (
+    <div>
+        <JobsPage />
+    </div>
+    // <JobProvider>
+    //   <JobsPage />
+    // </JobProvider>
+  );
 }
