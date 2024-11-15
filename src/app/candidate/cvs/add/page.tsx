@@ -1,4 +1,4 @@
-import AddCvPage from "../../_components/AddCvPage";
+import AddCvPage from "../_components/AddCvPage";
 
 const AddPage = () => {
     return (

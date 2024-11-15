@@ -1,6 +1,6 @@
 // pages/candidate/cvs/[id].tsx
 import { Metadata } from "next";
-import DetailCvPage from "../../_components/DetailCvPage"; // Đường dẫn đến component DetailCvPage
+import DetailCvPage from "../_components/DetailCvPage"; // Đường dẫn đến component DetailCvPage
 import { cookies } from "next/headers"; // Lấy cookies từ headers
 import cvApiRequest from "@/app/apiRequest/cv"; // Đường dẫn đến API request cho CV
 import { CvResType } from "@/app/schemaValidations/cv.schema"; // Kiểu dữ liệu cho CV

@@ -1,9 +1,10 @@
 // Layout.tsx
 import React, { ReactNode } from 'react';
 import Header from './Header';
-import HomePage from '@/app/home/HomePage';
+// import HomePage from '@/app/HomePage';
 import Banner from './Banner';
 import Footer from './Footer';
+// import HomePage from '@/app/HomePage';
 
 interface LayoutProps {
     children: ReactNode; // Chỉ định kiểu cho children
@@ -14,7 +15,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <div>
             <Header />
             <Banner />
-            <HomePage />
             <div className="p-4 text-xs">
                 {children}
             </div>

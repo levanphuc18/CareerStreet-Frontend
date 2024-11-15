@@ -2,7 +2,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import logo from "/public/images/logo.png";
-import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/16/solid";
+import { ChevronDownIcon, ChevronRightIcon } from "@radix-ui/react-icons";
 
 export default function Header() {
 
@@ -110,16 +110,6 @@ export default function Header() {
 
               <li className="relative group">
                 <Link
-                  className="text-xs text-gray-800 hover:text-blue-600 transition-colors duration-300"
-                  href="#"
-                >
-                  Công ty
-                </Link>
-                <span className="absolute bottom-[-2px] left-0 right-0 h-[2px] bg-blue-600 scale-x-0 transition-transform duration-300 group-hover:scale-x-100"></span>
-              </li>
-
-              <li className="relative group">
-                <Link
                   className="text-xs text-gray-800 hover:text-blue-600 transition-colors duration-300 flex items-center"
                   href="#"
                 >
@@ -162,15 +152,6 @@ export default function Header() {
         {/* kiểm tra đăng nhập */}
         <div className="text-xs">
           {/* Giao diện khi người dùng chưa đăng nhập */}
-
-          <div className="flex items-center gap-4">
-            <Link
-              href="/employer/login"
-              className="text-blue-600 border border-blue-600 hover:bg-blue-600 hover:text-white font-semibold transition duration-300 px-4 py-2 rounded-full"
-            >
-              Dành cho nhà tuyển dụng
-            </Link>
-          </div>
         </div>
       </nav>
     </header>

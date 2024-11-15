@@ -1,6 +1,8 @@
-import Link from "next/link"; // Nhớ import Link từ next/link
+"use client"
+import { useCandidateContext } from "@/app/context/CandidateContext";
 
-export default function AccountPage() {
+export default function AccountPage(){
+  const {candidateContext} = useCandidateContext();
   return (
     <div className="container w-full flex flex-wrap mx-auto px-2 pt-8 lg:pt-16 mt-0">
       <div className="w-full lg:w-1/5 px-6 text-xl text-gray-800 leading-normal">
@@ -112,7 +114,7 @@ export default function AccountPage() {
                   <input
                     className="form-input block w-full border border-gray-300 rounded-md shadow-sm focus:border-yellow-500 focus:ring focus:ring-yellow-500 focus:ring-opacity-50"
                     id="my-textfield-name"
-                    value="{candidate?.fullName}"
+                    value={candidateContext?.fullName}
                     type="text"
                     placeholder="Enter text here"
                   />
@@ -131,7 +133,7 @@ export default function AccountPage() {
                   <input
                     className="form-input block w-full border border-gray-300 rounded-md shadow-sm focus:border-yellow-500 focus:ring focus:ring-yellow-500 focus:ring-opacity-50"
                     id="my-textfield-email"
-                    value={"levanphuc@gmail.com"}
+                    value="levanphuc@gmail.com"
                     type="email"
                     placeholder="Enter email here"
                   />
@@ -150,8 +152,7 @@ export default function AccountPage() {
                   <select
                     className="form-select block w-full border border-gray-300 rounded-md shadow-sm focus:border-yellow-500 focus:ring focus:ring-yellow-500 focus:ring-opacity-50"
                     id="my-select-gender"
-                    //   value={candidate?.gender ? "1" : "0"} // Sử dụng value từ API
-                    value="qưe"
+                      value={candidateContext?.gender ? "1" : "0"} // Sử dụng value từ API
                   >
                     <option value="1">Nam</option>
                     <option value="0">Nữ</option>
@@ -170,9 +171,9 @@ export default function AccountPage() {
                 <div className="md:w-2/3">
                   <input
                     className="form-input block w-full border border-gray-300 rounded-md shadow-sm focus:border-yellow-500 focus:ring focus:ring-yellow-500 focus:ring-opacity-50"
-                    //   value={candidate?.phone}
                     id="my-textfield-phone"
                     type="text"
+                    value = {candidateContext?.phone}
                     placeholder="Enter phone number here"
                   />
                 </div>
@@ -192,9 +193,9 @@ export default function AccountPage() {
                     id="birthdate"
                     type="date"
                     placeholder="Chọn ngày sinh"
-                    //   value={
-                    //     candidate?.birthday ? candidate.birthday.slice(0, 10) : ""
-                    //   } // Format date to yyyy-mm-dd
+                      value={
+                        candidateContext?.birthday ? candidateContext.birthday.slice(0, 10) : ""
+                      } // Format date to yyyy-mm-dd
                     readOnly // Nếu bạn muốn chỉ hiển thị mà không cho phép thay đổi
                   />
                 </div>
@@ -212,7 +213,7 @@ export default function AccountPage() {
                   <textarea
                     className="form-textarea block w-full border border-gray-300 rounded-md shadow-sm focus:border-yellow-500 focus:ring focus:ring-yellow-500 focus:ring-opacity-50"
                     id="my-textarea"
-                    //   value={candidate?.address}
+                      value={candidateContext?.address}
                     rows={2}
                     placeholder="Enter details here"
                   ></textarea>

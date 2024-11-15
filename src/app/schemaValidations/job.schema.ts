@@ -10,6 +10,7 @@ export const Job = z.object({
   title: z.string(),                    // Tiêu đề công việc
   jobLocation: z.string(),   // Địa điểm công việc (có thể bỏ trống)
   salary: z.number(),                   // Lương
+  numberOfRecruitment: z.number(),                   // Lương
   jobDescription: z.string(), // Mô tả công việc
   jobRequirements: z.string(),// Yêu cầu công việc
   benefits: z.string(),      // Lợi ích
@@ -41,6 +42,7 @@ export const JobCreateBody = z.object({
   title: z.string(),
   jobLocation: z.string(),
   salary: z.string(),
+  numberOfRecruitment: z.number(),
   jobDescription: z.string(),
   jobRequirements: z.string(),
   benefits: z.string(),

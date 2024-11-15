@@ -5,7 +5,8 @@ export const RegisterBody = z
     username: z.string(),
     password: z.string().min(3).max(100),
     email: z.string().email(),
-    role: z.number().default(3),
+    // role: z.number().default(3),
+    role: z.number(),
   })
   .strict();
 
@@ -55,15 +56,14 @@ export type CandidateResType = z.infer<typeof CandidateRes>;
 // Định nghĩa schema cho Employer
 export const EmployerRes = z.object({
   data: z.object({
-    id: z.number(),
+    employerId: z.number(),
     fullName: z.string(),
     address: z.string(),
-    company: z.string(),
-    gender: z.boolean(),
-    tax: z.string(),
     phone: z.string(),
+    gender: z.boolean(),
     avatar: z.string(),
     username: z.string(),
+    birthday: z.string(), // Sử dụng optional nếu giá trị có thể là null hoặc undefined
   }),
   message: z.string(),
 });

@@ -1,13 +1,11 @@
-import { useState } from "react"; // Import useState để quản lý state
-import {
-  HomeIcon,
-  DocumentIcon,
-  BookmarkIcon,
-  CheckCircleIcon,
-  BellIcon,
-  UserIcon,
-} from "@heroicons/react/24/outline"; // Hoặc import solid nếu bạn thích
-import Link from "next/link"; // Đảm bảo bạn đã import Link
+import { useState } from "react";
+import { AiFillHome } from "react-icons/ai"; // Home icon từ Ant Design
+import { MdDescription } from "react-icons/md"; // Document icon từ Material Design
+import { RiBookmarkFill } from "react-icons/ri"; // Bookmark icon từ Remix Icons
+import { AiOutlineCheckCircle } from "react-icons/ai"; // CheckCircle icon từ Ant Design
+import { AiOutlineBell } from "react-icons/ai"; // Bell icon từ Ant Design
+import { AiOutlineUser } from "react-icons/ai"; // User icon từ Ant Design
+import Link from "next/link";
 
 export default function LocalMenu() {
   const [activeTab, setActiveTab] = useState("home"); // State để lưu tab đang hoạt động
@@ -25,7 +23,7 @@ export default function LocalMenu() {
                 type="button"
                 onClick={() => setActiveTab("home")} // Cập nhật state khi nhấn
               >
-                <HomeIcon className="h-5 w-5 inline-block mr-2 " />
+                <AiFillHome className="h-5 w-5 inline-block mr-2" />
                 My CareerStreet
               </button>
             </Link>
@@ -39,8 +37,8 @@ export default function LocalMenu() {
                 type="button"
                 onClick={() => setActiveTab("cvs")}
               >
-                <DocumentIcon className="h-5 w-5 inline-block mr-2" />
-                Hồ sơ xin việc (1)
+                <MdDescription className="h-5 w-5 inline-block mr-2" />
+                Hồ sơ xin việc
               </button>
             </Link>
           </li>
@@ -53,8 +51,8 @@ export default function LocalMenu() {
                 type="button"
                 onClick={() => setActiveTab("saved")}
               >
-                <BookmarkIcon className="h-5 w-5 inline-block mr-2" />
-                Việc đã lưu (2)
+                <RiBookmarkFill className="h-5 w-5 inline-block mr-2" />
+                Việc đã lưu
               </button>
             </Link>
           </li>
@@ -67,8 +65,8 @@ export default function LocalMenu() {
                 type="button"
                 onClick={() => setActiveTab("applied")}
               >
-                <CheckCircleIcon className="h-5 w-5 inline-block mr-2" />
-                Việc đã ứng tuyển (1)
+                <AiOutlineCheckCircle className="h-5 w-5 inline-block mr-2" />
+                Việc đã ứng tuyển
               </button>
             </Link>
           </li>
@@ -81,8 +79,8 @@ export default function LocalMenu() {
                 type="button"
                 onClick={() => setActiveTab("notifications")}
               >
-                <BellIcon className="h-5 w-5 inline-block mr-2" />
-                Thông báo việc làm (0)
+                <AiOutlineBell className="h-5 w-5 inline-block mr-2" />
+                Thông báo việc làm
               </button>
             </Link>
           </li>
@@ -95,7 +93,7 @@ export default function LocalMenu() {
                 type="button"
                 onClick={() => setActiveTab("account")}
               >
-                <UserIcon className="h-5 w-5 inline-block mr-2" />
+                <AiOutlineUser className="h-5 w-5 inline-block mr-2" />
                 Tài khoản
               </button>
             </Link>

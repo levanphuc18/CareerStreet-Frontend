@@ -1,9 +1,11 @@
+
 import AccountPage from "../_components/AccountPage";
 
-export default function Account() {
+export default async function Account() {
     return (
       <>
-      <AccountPage/>
+      <AccountPage
+      />
       </>
     );
   }

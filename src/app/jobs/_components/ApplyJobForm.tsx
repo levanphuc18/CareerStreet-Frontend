@@ -1,192 +1,172 @@
-"use client"; // Đánh dấu đây là Client Component
+import React, { useState } from "react";
+import { CvListResType } from "@/app/schemaValidations/cv.schema";
+import { JobResType } from "@/app/schemaValidations/job.schema";
+import { ApplyCreateBodyType } from "@/app/schemaValidations/apply.schema";
+import applyApiRequest from "@/app/apiRequest/apply";
+import Alert from "@/components/Alert";
+import { useRouter } from "next/navigation";
 
-import React, { useState } from 'react';
-
-// Định nghĩa interface cho props
 interface ApplyJobFormProps {
-  isOpen: boolean;  // Thêm thuộc tính isOpen
+  isOpen: boolean;
   onClose: () => void;
+  cvList: CvListResType["data"] | null;
+  candidateId: number | null;
+  job: JobResType["data"] | null;
 }
 
-const ApplyJobForm: React.FC<ApplyJobFormProps> = ({ isOpen, onClose }) => {
-  const [fileSelected, setFileSelected] = useState<File | null>(null); // Lưu thông tin file đã chọn
-  const [sourceSelected, setSourceSelected] = useState<string>(''); // Lưu nguồn CV đã chọn
+const ApplyJobForm: React.FC<ApplyJobFormProps> = ({
+  isOpen,
+  onClose,
+  cvList,
+  candidateId,
+  job,
+}) => {
+  const [formData, setFormData] = useState({
+    candidateCvId: cvList ? cvList[0]?.candidateCvId || null : null,
+    jobId: job?.jobId || null,
+    coverLetter: "",
+    status: 1,
+  });
 
-  // Hàm xử lý khi chọn file
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]; // Lấy file đã chọn
-    if (file) {
-      setFileSelected(file); // Đánh dấu đã chọn file
-      setSourceSelected('');  // Reset nguồn CV đã chọn, để chỉ chọn file
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
+  };
+
+  const validateForm = () => {
+    const { coverLetter } = formData;
+    const formErrors: { [key: string]: string } = {};
+    if (!coverLetter) {
+      formErrors.coverLetter = "Thư xin việc không được để trống.";
+    }
+    setErrors(formErrors);
+    return Object.keys(formErrors).length === 0;
+  };
+
+  const router = useRouter();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (validateForm()) {
+      try {
+        const ApplyData: ApplyCreateBodyType = {
+          candidateCvId: formData.candidateCvId ? Number(formData.candidateCvId) : 0,
+          jobId: formData.jobId ? Number(formData.jobId) : 0,
+          coverLetter: formData.coverLetter,
+          status: 0,
+        };
+        const result = await applyApiRequest.createApply(ApplyData);
+        Alert.success("Thành công!", result.payload.message);
+        router.push("/candidate/applied");
+        router.refresh();
+      } catch (error) {
+        Alert.error("Lỗi!", "Đã xảy ra lỗi khi tạo khách hàng.");
+      }
     }
   };
 
-  // Hàm xử lý khi chọn nguồn CV
+  const [sourceSelected, setSourceSelected] = useState<string>("");
+
   const handleOptionChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedSource = event.target.value;
-    setSourceSelected(selectedSource); // Cập nhật nguồn CV đã chọn
-    setFileSelected(null); // Reset file đã chọn, chỉ sử dụng nguồn CV
+    setSourceSelected(selectedSource);
+    const selectedCv = cvList?.find(
+      (cv) => String(cv.candidateCvId) === String(candidateId)
+    );
+    if (selectedCv) {
+      setFormData((prevState) => ({
+        ...prevState,
+        coverLetter: `Nhập nội dung thư xin việc cho vị trí ${job?.title}:`,
+      }));
+    } else {
+      setFormData((prevState) => ({
+        ...prevState,
+        coverLetter: "",
+      }));
+    }
   };
 
-  if (!isOpen) return null; // Nếu modal không mở, không hiển thị gì
+  if (!isOpen) return null;
 
   return (
-    <>
-      {/* Main modal */}
-      <div
-        id="crud-modal"
-        tabIndex={-1}
-        aria-hidden="true"
-        className="fixed inset-0 z-50 flex justify-center items-center bg-black bg-opacity-50"
-      >
-        <div className="relative p-4 w-full max-w-md max-h-full">
-          {/* Modal content */}
-          <div className="relative bg-white rounded-lg shadow">
-            {/* Modal header */}
-            <div className="flex items-center justify-between p-4 border-b rounded-t">
-              <h3 className="text-lg font-bold text-black">
-                Nộp đơn IT Security Manager
-              </h3>
-              <button
-                type="button"
-                onClick={onClose} // Đóng modal khi nhấn nút này
-                className="text-gray-600 bg-transparent hover:bg-gray-200 rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center"
+    <div className="fixed inset-0 z-50 flex justify-center items-center bg-black bg-opacity-50">
+      <div className="relative p-4 w-full max-w-md max-h-full">
+        <div className="relative bg-white rounded-lg shadow">
+          <div className="flex items-center justify-between p-4 border-b rounded-t">
+            <h3 className="text-lg font-bold text-black">Nộp đơn {job?.title}</h3>
+            <button
+              type="button"
+              onClick={onClose}
+              className="text-gray-600 bg-transparent hover:bg-gray-200 rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center"
+            >
+              <svg
+                className="w-3 h-3"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 14 14"
               >
-                <svg
-                  className="w-3 h-3"
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 14 14"
+                <path
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+                />
+              </svg>
+            </button>
+          </div>
+          <form className="p-4" onSubmit={handleSubmit}>
+            <div className="grid gap-4 mb-4 grid-cols-2">
+              <div className="col-span-2">
+                <label className="block mb-2 text-sm font-bold text-black">
+                  {/* Le Van Phuc + {"sl hồ sơ: " + cvList?.length + " canId: " + candidateId + " jobId: " + job?.jobId}
+                  <p className="text-black">levanphuc@gmail.com</p> */}
+                </label>
+              </div>
+
+              <div className="col-span-2">
+                <label className="block mb-2 text-sm font-bold text-black">Chọn CV</label>
+                <select
+                  id="cvSelect"
+                  className="bg-white border border-gray-400 text-black text-sm rounded-lg block w-full p-2.5"
+                  onChange={handleOptionChange}
+                  value={sourceSelected}
                 >
-                  <path
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
-                  />
-                </svg>
-                <span className="sr-only">Close modal</span>
+                  <option value="" disabled>Chọn CV từ danh sách</option>
+                  {cvList && cvList.map((cv) => (
+                    <option key={cv.candidateCvId} value={cv.candidateCvId}>{cv.title}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="col-span-2">
+                <label htmlFor="coverLetter" className="block mb-2 text-sm font-bold text-black">Thư xin việc</label>
+                <textarea
+                  id="coverLetter"
+                  rows={8}
+                  className="block p-2.5 w-full text-sm text-black bg-white rounded-lg border border-gray-400"
+                  placeholder="Nhập thư xin việc"
+                  value={formData.coverLetter}
+                  onChange={handleChange}
+                />
+                {errors.coverLetter && <span className="text-red-500 text-sm">{errors.coverLetter}</span>}
+              </div>
+            </div>
+            <div className="flex justify-center">
+              <button type="submit" className="text-white bg-green-600 hover:bg-green-700 font-medium rounded-lg text-sm px-5 py-2.5">
+                Nộp
               </button>
             </div>
-            {/* Modal body */}
-            <form className="p-4">
-              <div className="grid gap-4 mb-4 grid-cols-2">
-                <div className="col-span-2">
-                  <label
-                    htmlFor="name"
-                    className="block mb-2 text-sm font-bold text-black"
-                  >
-                    Le Van Phuc
-                    <p className="text-black">levanphuc@gmail.com</p>
-                  </label>
-                </div>
-
-                {/* Chọn CV */}
-                <div className="col-span-2">
-                  <label
-                    htmlFor="resume"
-                    className="block mb-2 text-sm font-bold text-black"
-                  >
-                    Chọn hồ sơ
-                  </label>
-
-                  {/* Khối chứa viền */}
-                  <div className="border border-gray-400 rounded-lg p-4 mb-4 bg-gray-200">
-                    {/* Hiển thị dropdown nếu chưa chọn file */}
-                    {!fileSelected && (
-                      <div className="mb-4">
-                        <select
-                          id="category"
-                          className="bg-white border border-gray-400 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                          onChange={handleOptionChange}
-                          value={sourceSelected} // Đảm bảo dropdown phản ánh trạng thái
-                        >
-                          <option className='text-center' value="" disabled>
-                            Từ CarrerStreet
-                          </option>
-                          <option className='text-center' value="javaBackend">Java-Backend</option>
-                          <option className='text-center' value="nextJsFrontend">NextJs-Frontend</option>
-                          <option className='text-center' value="fullStack">Full</option>
-                        </select>
-                      </div>
-                    )}
-
-                    {/* Trường tải hồ sơ từ máy tính */}
-                    {sourceSelected === '' && (
-                      <div>
-                        <input
-                          type="file"
-                          name="resume"
-                          id="resume"
-                          className="bg-white border border-gray-400 text-black text-sm rounded-lg block w-full p-2.5"
-                          onChange={handleFileChange}
-                          required
-                        />
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="col-span-2 sm:col-span-2">
-                  <label
-                    htmlFor="phone"
-                    className="block mb-2 text-sm font-bold text-black"
-                  >
-                    Số điện thoại
-                  </label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    id="phone"
-                    className="bg-white border border-gray-400 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                    placeholder="Nhập số điện thoại"
-                    required
-                  />
-                </div>
-
-                <div className="col-span-2">
-                  <label
-                    htmlFor="description"
-                    className="block mb-2 text-sm font-bold text-black"
-                  >
-                    Thư xin việc
-                  </label>
-                  <textarea
-                    id="description"
-                    rows={4}
-                    className="block p-2.5 w-full text-sm text-black bg-white rounded-lg border border-gray-400 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Nhập thư xin việc"
-                    defaultValue={""}
-                  />
-                </div>
-              </div>
-              <div className="flex justify-center">
-                <button
-                  type="submit"
-                  className="text-white inline-flex items-center bg-green-600 hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
-                >
-                  <svg
-                    className="me-1 -ms-1 w-5 h-5"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  Nộp
-                </button>
-              </div>
-            </form>
-          </div>
+          </form>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

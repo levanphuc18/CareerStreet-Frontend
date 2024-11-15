@@ -1,5 +1,5 @@
 import React from "react";
-import EditCvPage from "../../../_components/EditCvPage";
+import EditCvPage from "../../_components/EditCvPage";
 // pages/candidate/cvs/[id].tsx
 import { Metadata } from "next";
 import { cookies } from "next/headers"; // Lấy cookies từ headers
@@ -7,7 +7,7 @@ import cvApiRequest from "@/app/apiRequest/cv"; // Đường dẫn đến API re
 import { CvResType } from "@/app/schemaValidations/cv.schema"; // Kiểu dữ liệu cho CV
 
 export const metadata: Metadata = {
-  title: "CV Details",
+  title: "Edit Cv",
 };
 
 export default async function EditPage({

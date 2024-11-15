@@ -1,24 +1,26 @@
 import { z } from "zod";
 
 // Tạo các trạng thái
-export const getStatusLabel = (status: number): string => {
+export function getStatusLabel(status: number): string {
   switch (status) {
     case 0:
-      return "Từ chối"; // Trạng thái 0: Từ chối
+      return "Chờ xét duyệt";
     case 1:
-      return "Chưa xem"; // Trạng thái 1: Chưa xem
+      return "Đang được xem xét";
     case 2:
-      return "Đã xem"; // Trạng thái 2: Đã xem
+      return "Đang chờ phỏng vấn";
     case 3:
-      return "Đã duyệt"; // Trạng thái 4: Đã duyệt
+      return "Phỏng vấn xong";
     case 4:
-      return "Đã mời phỏng vấn"; // Trạng thái 5: Đã mời phỏng vấn
+      return "Đang chờ quyết định";
     case 5:
-      return "Đã mời nhận việc"; // Trạng thái 6: Đã mời nhận việc
+      return "Đã tuyển dụng";
+    case -1:
+      return "Bị từ chối";
     default:
-      return "Chưa xác định"; // Trạng thái mặc định
+      return "Chưa xác định";
   }
-};
+}
 
 // Khai báo schema cho đơn ứng tuyển
 export const Apply = z.object({

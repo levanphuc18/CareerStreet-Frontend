@@ -5,8 +5,8 @@ import http from "../untils/http"
 const cvApiRequest = {
     createCv: (body: FormData) => 
         http.post<CvResType>("candidate-cv/create", body),
-    getAllCvById: (id: number, sessionToken: string) =>
-        http.get<CvResType>(`/candidate-cv/by-candidate/${id}`, {
+    getAllCvByCandidateId: (candidateId: number, sessionToken: string) =>
+        http.get<CvResType>(`/candidate-cv/by-candidate/${candidateId}`, {
             headers: {
               Authorization: `Bearer ${sessionToken}`
             }

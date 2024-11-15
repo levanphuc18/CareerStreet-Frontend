@@ -4,7 +4,7 @@ import {deleteCookie } from "cookies-next"; // Import hàm deleteCookie
 import Image from "next/image";
 import logo from "/public/images/logo.png";
 import icon from "/public/images/icon.jpg";
-import { ChevronDownIcon } from "@heroicons/react/24/solid"; // Cập nhật đường dẫn import
+import { ChevronDownIcon } from "@radix-ui/react-icons"; // Cập nhật đường dẫn import
 
 export default function Header() {
   // const [username, setUsername] = useState("");
@@ -14,6 +14,7 @@ export default function Header() {
   const handleLogout = () => {
     deleteCookie("username"); // Xóa cookie
     deleteCookie("userId"); // Xóa cookie
+    deleteCookie("sessionToken"); // Xóa cookie
     window.location.href = "/"; // Chuyển hướng về trang chủ
   };
   return (
@@ -60,6 +61,15 @@ export default function Header() {
 
           {/* Menu tùy chọn */}
           <ul className="text-xs absolute right-0 top-full mt-2 w-48 bg-white shadow-lg rounded-lg opacity-0 group-hover:opacity-100 transform group-hover:translate-y-0 translate-y-2 transition-all duration-300 z-10">
+            
+          <li>
+                  <Link
+                    className="text-xs block px-4 py-2 text-gray-700 hover:bg-purple-100 hover:text-purple-600 transition-colors duration-200 rounded-t-lg"
+                    href="/candidate"
+                  >
+                    CarrerStreet
+                  </Link>
+                </li>
             <li>
               <Link
                 className="text-xs block px-4 py-2 text-gray-700 hover:bg-purple-100 hover:text-purple-600 transition-colors duration-200 rounded-t-lg"
@@ -79,7 +89,7 @@ export default function Header() {
             <li>
               <Link
                 className="text-xs block px-4 py-2 text-gray-700 hover:bg-purple-100 hover:text-purple-600 transition-colors duration-200"
-                href="candidate/saved"
+                href="/candidate/saved"
               >
                 Việc đã lưu
               </Link>

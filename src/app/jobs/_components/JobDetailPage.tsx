@@ -135,6 +135,11 @@ export default function JobsPage({
               <span className="font-bold">{job?.postingDate}</span> | Hết hạn
               trong: <span className="font-bold"> {daysLeft} ngày</span>
             </span>
+
+            <div className="flex items-center mb-2">
+              <MdAttachMoney className="mr-2" /> {/* Icon tiền */}
+              <p className="job-numberOfRecruitment">Số lượng tuyển: {job?.numberOfRecruitment} Người</p>
+            </div>
           </div>
           <div className="flex items-center space-x-2 mb-4">
             <a
