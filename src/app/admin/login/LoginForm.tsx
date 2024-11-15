@@ -1,12 +1,12 @@
 "use client";
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation"; // Đã thay đổi thành "next/router"
 import { useState } from "react";
-import { deleteCookie } from "cookies-next"; // Import hàm deleteCookie
-import { LoginBody, LoginBodyType } from "../schemaValidations/auth.schema";
+
 import authApiRequest from "@/app/apiRequest/auth";
-import Alert from "@/components/Alert";
+import { LoginBody, LoginBodyType } from "@/app/schemaValidations/auth.schema";
 
 export default function LoginForm() {
   const form = useForm<LoginBodyType>({
@@ -42,34 +42,21 @@ export default function LoginForm() {
         );
         console.log("Role response: ", roleData); // In ra phản hồi từ API roleid
 
-        const userRole = roleData.payload.data;
-
-        // Kiểm tra vai trò người dùng và chuyển hướng
-        if (userRole === 3) {
-          console.log("Dang nhap Candidate thanh cong");
-          router.push("/"); // Trang dành cho Candidate
-        } else if (userRole === 2) {
-          console.log("Dang nhap Employer thanh cong");
-          router.push("/employer/home"); // Trang dành cho Employer
-        } else if (userRole === 1) {
-          deleteCookie("username"); // Xóa cookie
-          deleteCookie("userId"); // Xóa cookie
-          deleteCookie("sessionToken"); // Xóa cookie
-          console.log("Vai trò là admin, không hỗ trợ đăng nhập.");
-          Alert.error("Lỗi:", "Không được phép đăng nhập.");
-          return; // Dừng lại và không tiếp tục các bước sau
+        // Kiểm tra nếu vai trò là Admin (role = 1)
+        if (roleData.payload.data === 1) {
+          console.log("Dang nhap Admin thanh cong");
+          router.push("/admin/home");
         } else {
-          console.log("Vai trò không hợp lệ hoặc không hỗ trợ");
-          Alert.error("Lỗi", "Vai trò không hợp lệ.");
-          return; // Dừng lại và không tiếp tục các bước sau
+          console.log("Vai trò không phải Admin, không thực hiện gì");
         }
       } catch (roleError) {
         console.error("Error fetching role:", roleError);
         // Xử lý lỗi lấy vai trò, ví dụ: thông báo lỗi cho người dùng
-        Alert.error("Lỗi", "Lỗi khi lấy vai trò người dùng.");
       }
+      // Làm mới trang
+      router.refresh();
     } catch (error) {
-      Alert.error("Đăng nhập thất bại", "Sai tên đăng nhập hoặc mật khẩu");
+      console.error("Error during submission:", error);
     } finally {
       setIsLoading(false);
     }
@@ -77,7 +64,7 @@ export default function LoginForm() {
 
   return (
     <>
-      <div className="flex min-h-full flex-1 flex-col justify-center px-2 py-10 lg:px-8 bg-gray-100">
+      <div className="flex min-h-full flex-1 flex-col justify-center px-2 py-10 lg:px-8 bg-blue-100">
         <div className="sm:mx-auto sm:w-full sm:max-w-sm ">
           <img
             alt="Your Company"
@@ -85,18 +72,19 @@ export default function LoginForm() {
             className="mx-auto h-10 w-auto"
           />
           <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
-            Sign in to your account
+            Đăng nhập vào tài khoản quản lý
           </h2>
         </div>
 
-        <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+        {/* Thêm thẻ div bao quanh form */}
+        <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm bg-white rounded-lg shadow-lg p-8">
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <div>
               <label
                 htmlFor="username"
                 className="block text-sm font-medium leading-6 text-gray-900"
               >
-                Username
+                Tên đăng nhập
               </label>
               <div className="mt-2">
                 <input
@@ -117,14 +105,14 @@ export default function LoginForm() {
                   htmlFor="password"
                   className="block text-sm font-medium leading-6 text-gray-900"
                 >
-                  Password
+                  Mật khẩu
                 </label>
                 <div className="text-sm">
                   <a
                     href="#"
                     className="font-semibold text-indigo-600 hover:text-indigo-500"
                   >
-                    Forgot password?
+                    Quên mật khẩu?
                   </a>
                 </div>
               </div>
@@ -146,18 +134,18 @@ export default function LoginForm() {
                 type="submit"
                 className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
               >
-                {isLoading ? "Loading..." : "Sign in"}
+                {isLoading ? "Đang tải..." : "Đăng nhập"}
               </button>
             </div>
           </form>
 
           <p className="mt-10 text-center text-sm text-gray-500">
-            Chưa có tài khoản?{" "}
+            Chưa có tài khoản?{" "}
             <a
               href="/register"
               className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500"
             >
-              Đăng ký ngay
+              Đăng ký ngay
             </a>
           </p>
         </div>
