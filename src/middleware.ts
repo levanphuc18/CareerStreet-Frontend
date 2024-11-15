@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import authApiRequest from "./app/apiRequest/auth";
 
-const authPaths = ["/login", "/register", "/admin/login"]; // Đường dẫn không yêu cầu đăng nhập
+const authPaths = ["/login", "/register", "/admin/login", "/jobs"]; // Đường dẫn không yêu cầu đăng nhập
 const adminPath = "/admin"; // Đường dẫn admin
 const employerPath = "/employer"; // Đường dẫn employer
 const candidatePath = "/"; // Đường dẫn candidate
@@ -70,6 +70,10 @@ export async function middleware(request: NextRequest) {
       // Không cho phép truy cập vào trang admin hoặc employer
       if (pathname.startsWith(adminPath) || pathname.startsWith(employerPath)) {
         return NextResponse.redirect(new URL("/", request.url));
+      }
+      // Cho phép candidate truy cập "/jobs"
+      if (pathname === "/jobs" || pathname.startsWith("/jobs")) {
+        return NextResponse.next();
       }
       // Chuyển hướng về trang candidate nếu không phải trang đó
       if (pathname !== candidatePath && !pathname.startsWith(candidatePath)) {
