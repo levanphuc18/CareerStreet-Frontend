@@ -12,8 +12,12 @@ const jobApiRequest ={
           }),
     getAllJobByStatus: (status: number) =>
       http.get<JobResType>(`/job/getall/status/${status}`),
+    getAllJob: () =>
+      http.get<JobResType>(`/job/getall`),
     getJobById: (id: number) =>
       http.get<JobResType>(`/job/get/${id}`),
+    updateJobStatus: (jobId: number, status: number) =>
+      http.put<JobResType>(`/job/update/${jobId}/jobstatus/${status}`),
     getAllLevel: () =>
       http.get<LevelResType>("/level/getall"),
         

@@ -6,17 +6,10 @@ const applyApiRequest ={
         http.post<ApplyResType>("apply/create",body),
     getAppliesByCandidateId: (candidateId: number) =>
       http.get<ApplyResType>(`apply/getAppliesByCandidateId/${candidateId}`),
-    
-    // getAllJobById: (id: number, sessionToken: string) =>
-    //     http.get<JobResType>(`/job/getJobByEmployer/${id}`, {
-    //         headers: {
-    //           Authorization: `Bearer ${sessionToken}`
-    //         }
-    //       }),
-    // getAllJobByStatus: (status: number) =>
-    //   http.get<JobResType>(`/job/getall/status/${status}`),
-    // getJobById: (id: number) =>
-    //   http.get<JobResType>(`/job/get/${id}`),
+    getAppliesByJobId: (jobId: number) =>
+      http.get<ApplyResType>(`apply/getAppliesByJobId/${jobId}`),
+    updateApplyStatus: (applyId: number, status: number) =>
+      http.put<ApplyResType>(`/apply/update/${applyId}/applystatus/${status}`),
         
 }
 export default applyApiRequest

@@ -1,10 +1,11 @@
 // import { RegisterResType } from "../schemaValidations/auth.schema"
-import { CandidateCreateBodyType, CandidateResType } from "../schemaValidations/candidate.schema"
+import { EmployerResType } from "../schemaValidations/auth.schema"
+import { EmployerCreateBodyType } from "../schemaValidations/employer.schema"
 import http from "../untils/http"
 
 const employerApiRequest ={
-    createCandidate:(body: CandidateCreateBodyType) =>
-        http.post<CandidateResType>("candidate/create",body),
+    createEmployer:(body: EmployerCreateBodyType) =>
+        http.post<EmployerResType>("employer/create",body),
     
 }
 export default employerApiRequest

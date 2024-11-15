@@ -10,8 +10,7 @@ export const Employer = z.object({
     gender: z.boolean(),
     avatar: z.string(),
     username: z.string(),
-    company: z.string(),
-    tax: z.string()
+    birthday: z.string() // Sử dụng optional nếu giá trị có thể là null hoặc undefined
 });
 
 export const EmployerCreateBody = z.object({
@@ -21,8 +20,7 @@ export const EmployerCreateBody = z.object({
     gender: z.boolean(),
     avatar: z.string(),
     username: z.string(),
-    company: z.string(),
-    tax: z.string()
+    birthday: z.string() // Sử dụng optional nếu giá trị có thể là null hoặc undefined
 });
 
 export type RegisterAccountBodyType = z.TypeOf<typeof RegisterAccountBody>
