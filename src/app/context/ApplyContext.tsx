@@ -4,16 +4,24 @@ import { ApplyListResType } from "@/app/schemaValidations/apply.schema";
 
 type ApplyContextType = {
   appliesListByCandidateId: ApplyListResType["data"] | null;
-  setAppliesListByCandidateId: React.Dispatch<React.SetStateAction<ApplyListResType["data"] | null>> | null;
+  setAppliesListByCandidateId: React.Dispatch<
+    React.SetStateAction<ApplyListResType["data"] | null>
+  > | null;
+  checkApplicationStatus: (jobId: number) => Promise<boolean>; // Thêm hàm kiểm tra
 };
 
 const ApplyContext = createContext<ApplyContextType>({
   appliesListByCandidateId: null,
   setAppliesListByCandidateId: null,
+  checkApplicationStatus: async () => false, // Default cho context
 });
 
-export const ApplyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [appliesListByCandidateId, setAppliesListByCandidateId] = useState<ApplyListResType["data"] | null>(null);
+export const ApplyProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const [appliesListByCandidateId, setAppliesListByCandidateId] = useState<
+    ApplyListResType["data"] | null
+  >(null);
 
   useEffect(() => {
     const fetchApplies = async () => {
@@ -28,7 +36,9 @@ export const ApplyProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
       if (username && userId !== null) {
         try {
-          const appliesResult = await applyApiRequest.getAppliesByCandidateId(userId);
+          const appliesResult = await applyApiRequest.getAppliesByCandidateId(
+            userId
+          );
 
           if (Array.isArray(appliesResult.payload.data)) {
             setAppliesListByCandidateId(appliesResult.payload.data);
@@ -44,8 +54,34 @@ export const ApplyProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     fetchApplies();
   }, []); // Chạy khi component mount
 
+  // Hàm kiểm tra trạng thái apply
+  const checkApplicationStatus = async (jobId: number): Promise<boolean> => {
+    const cookies = document.cookie;
+    const userIdMatch = cookies.match(/userId=([^;]+)/);
+    const userId = userIdMatch ? parseInt(userIdMatch[1], 10) : null;
+
+    if (userId !== null) {
+      try {
+        const result = await applyApiRequest.checkApplicationStatus(
+          userId,
+          jobId
+        ); // Gọi API kiểm tra
+        return result.payload === true; // Xử lý giá trị trả về (true/false)
+      } catch (error) {
+        console.error("Error while checking application status:", error);
+      }
+    }
+    return false;
+  };
+
   return (
-    <ApplyContext.Provider value={{ appliesListByCandidateId, setAppliesListByCandidateId }}>
+    <ApplyContext.Provider
+      value={{
+        appliesListByCandidateId,
+        setAppliesListByCandidateId,
+        checkApplicationStatus,
+      }}
+    >
       {children}
     </ApplyContext.Provider>
   );

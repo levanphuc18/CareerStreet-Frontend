@@ -10,6 +10,8 @@ const applyApiRequest ={
       http.get<ApplyResType>(`apply/getAppliesByJobId/${jobId}`),
     updateApplyStatus: (applyId: number, status: number) =>
       http.put<ApplyResType>(`/apply/update/${applyId}/applystatus/${status}`),
+    checkApplicationStatus: (candidateId: number, jobId: number) => 
+      http.get<boolean>(`apply/check-application?candidateId=${candidateId}&jobId=${jobId}`),
         
 }
 export default applyApiRequest

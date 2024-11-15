@@ -66,9 +66,11 @@ export default function RootLayout({
               </ApplyProvider>
             </CandidateProvider>
           ) : isJobsPage ? (
+            <ApplyProvider>
             <JobProvider>
               <LayoutJobs>{children}</LayoutJobs>
             </JobProvider>
+            </ApplyProvider>
           ) : isEmployerPage ? (
             <LayoutEmployer>{children}</LayoutEmployer>
           ) : isAdminLoginPage ? (

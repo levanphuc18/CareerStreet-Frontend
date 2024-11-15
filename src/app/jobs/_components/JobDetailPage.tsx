@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"; // Đánh dấu đây là Client Component
 import {
   MdWork,
@@ -14,6 +13,7 @@ import { JobResType } from "@/app/schemaValidations/job.schema";
 import { useRouter } from "next/navigation";
 import { CvListResType } from "@/app/schemaValidations/cv.schema";
 import { TechListResType } from "@/app/schemaValidations/tech.schema";
+import { useApplyContext } from "@/app/context/ApplyContext";
 
 const calculateDaysLeft = (
   postingDate?: string | Date,
@@ -56,8 +56,6 @@ export default function JobsPage({
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // console.log(cvList?.length + " phuc " + candidateId + " jobid: " + job?.jobId);
-
   const handleOpenModal = () => {
     const username = getCookie("username"); // Lấy giá trị username từ cookie
     console.log("username:", username); // Kiểm tra giá trị username trong cookie
@@ -95,6 +93,23 @@ export default function JobsPage({
   };
 
   const daysLeft = calculateDaysLeft(job?.postingDate, job?.expirationDate);
+
+  const { checkApplicationStatus } = useApplyContext(); // Lấy hàm kiểm tra trạng thái ứng tuyển từ context
+  const [isApplied, setIsApplied] = useState(false); // Lưu trạng thái ứng tuyển
+
+  useEffect(() => {
+    // Kiểm tra trạng thái ứng tuyển khi jobId thay đổi
+    const checkStatus = async () => {
+      if (job?.jobId) {
+        const status = await checkApplicationStatus(job.jobId);
+        console.log("jobID:" + job.jobId);
+        console.log("status apply:" + status);
+        setIsApplied(status); // Cập nhật trạng thái ứng tuyển
+      }
+    };
+
+    checkStatus();
+  }, [job?.jobId, checkApplicationStatus]); // Chạy lại khi jobId thay đổi
 
   return (
     <>
@@ -138,17 +153,25 @@ export default function JobsPage({
 
             <div className="flex items-center mb-2">
               <MdAttachMoney className="mr-2" /> {/* Icon tiền */}
-              <p className="job-numberOfRecruitment">Số lượng tuyển: {job?.numberOfRecruitment} Người</p>
+              <p className="job-numberOfRecruitment">
+                Số lượng tuyển: {job?.numberOfRecruitment} Người
+              </p>
             </div>
           </div>
           <div className="flex items-center space-x-2 mb-4">
             <a
               href="#"
-              className="border border-teal-500 bg-transparent hover:bg-teal-500 hover:text-white text-teal-500 text-center block rounded-full py-2 px-6 transition-colors duration-300"
-              onClick={handleOpenModal} // Gọi hàm mở modal
+              className={`border border-teal-500 ${
+                isApplied
+                  ? "bg-gray-500 text-white cursor-not-allowed" // Thêm cursor-not-allowed cho trạng thái vô hiệu hóa
+                  : "bg-transparent hover:bg-teal-500 hover:text-white text-teal-500"
+              } text-center block rounded-full py-2 px-6 transition-colors duration-300`}
+              onClick={isApplied ? undefined : handleOpenModal} // Vô hiệu hóa hành động click khi isApplied
+              aria-disabled={isApplied} // Thêm thuộc tính trợ năng (accessibility)
             >
-              Nộp đơn ngay
+              {isApplied ? "Bạn đã ứng tuyển" : "Nộp đơn ngay"}
             </a>
+
             <a
               href="#"
               className="border border-teal-500 bg-transparent hover:bg-teal-500 hover:text-white text-teal-500 text-center block rounded-full py-2 px-4 transition-colors duration-300 flex items-center"
