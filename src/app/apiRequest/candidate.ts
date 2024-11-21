@@ -10,6 +10,13 @@ const candidateApiRequest ={
                 Authorization: `Bearer ${sessionToken}`
             }
         }),
+    getAllCandidate:(sessionToken: string) =>
+        http.get<CandidateResType>("candidate/list/all",{
+            headers: {
+                Authorization: `Bearer ${sessionToken}`
+            }
+        }),
+    
     
 }
 export default candidateApiRequest
