@@ -30,7 +30,14 @@ export const RegisterAccountBody = z.object({
     role: z.number()
   
   })
+
+  // List Candidate
+export const CandidateListRes = z.object({
+    data: z.array(Candidate), // Đây là danh sách các CV
+    message: z.string(),
+  });
   
+  export type CandidateListResType = z.TypeOf<typeof CandidateListRes>;
   export type RegisterAccountBodyType = z.TypeOf<typeof RegisterAccountBody>
   export type CandidateCreateBodyType = z.TypeOf<typeof CandidateCreateBody>
   export type CandidateResType = z.TypeOf<typeof CandidateRes>

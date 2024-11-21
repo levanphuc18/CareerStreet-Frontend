@@ -102,7 +102,7 @@ export default function HomePage() {
                 {isCandidatesDropdownOpen && (
                   <div className="pl-4">
                     <Link
-                      href="/employer/jobs/1/applies"
+                      href="/employer/jobs/applies"
                       className="flex items-center px-4 py-2 mt-2 text-gray-100 hover:bg-gray-700 rounded-lg"
                     >
                       <span>Hồ sơ xin việc đã nhận</span>

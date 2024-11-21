@@ -1,7 +1,7 @@
 "use client";
 
 import { ApplyListResType } from "@/app/schemaValidations/apply.schema";
-import AppliesPage from "../../_components/AppliesPage";
+import AppliesPage from "../_components/AppliesPage";
 import {useEffect, useState } from "react";
 import applyApiRequest from "@/app/apiRequest/apply";
 import { useParams } from "next/navigation"; // Import useParams

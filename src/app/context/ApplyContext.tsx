@@ -7,12 +7,18 @@ type ApplyContextType = {
   setAppliesListByCandidateId: React.Dispatch<
     React.SetStateAction<ApplyListResType["data"] | null>
   > | null;
+  appliesListByEmployerId: ApplyListResType["data"] | null;
+  setAppliesListByEmployerId: React.Dispatch<
+    React.SetStateAction<ApplyListResType["data"] | null>
+  > | null;
   checkApplicationStatus: (jobId: number) => Promise<boolean>; // Thêm hàm kiểm tra
 };
 
 const ApplyContext = createContext<ApplyContextType>({
   appliesListByCandidateId: null,
   setAppliesListByCandidateId: null,
+  appliesListByEmployerId: null,
+  setAppliesListByEmployerId: null,
   checkApplicationStatus: async () => false, // Default cho context
 });
 
@@ -22,19 +28,17 @@ export const ApplyProvider: React.FC<{ children: React.ReactNode }> = ({
   const [appliesListByCandidateId, setAppliesListByCandidateId] = useState<
     ApplyListResType["data"] | null
   >(null);
+  const [appliesListByEmployerId, setAppliesListByEmployerId] = useState<
+    ApplyListResType["data"] | null
+  >(null);
 
   useEffect(() => {
-    const fetchApplies = async () => {
-      // Thay vì dùng cookies từ next/headers, ta lấy cookies từ document.cookie (client-side)
+    const fetchAppliesByCandidate = async () => {
       const cookies = document.cookie;
-      const usernameMatch = cookies.match(/username=([^;]+)/);
       const userIdMatch = cookies.match(/userId=([^;]+)/);
+      const userId = userIdMatch ? parseInt(userIdMatch[1], 10) : null;
 
-      const username = usernameMatch ? usernameMatch[1] : null;
-      const userIdString = userIdMatch ? userIdMatch[1] : null;
-      const userId = userIdString ? parseInt(userIdString, 10) : null;
-
-      if (username && userId !== null) {
+      if (userId !== null) {
         try {
           const appliesResult = await applyApiRequest.getAppliesByCandidateId(
             userId
@@ -46,15 +50,40 @@ export const ApplyProvider: React.FC<{ children: React.ReactNode }> = ({
             setAppliesListByCandidateId([appliesResult.payload.data]);
           }
         } catch (error) {
-          console.error("An error occurred while fetching Applies:", error);
+          console.error("An error occurred while fetching Applies by Candidate:", error);
         }
       }
     };
 
-    fetchApplies();
-  }, []); // Chạy khi component mount
+    fetchAppliesByCandidate();
+  }, []);
 
-  // Hàm kiểm tra trạng thái apply
+  useEffect(() => {
+    const fetchAppliesByEmployer = async () => {
+      const cookies = document.cookie;
+      const employerIdMatch = cookies.match(/userId=([^;]+)/);
+      const employerId = employerIdMatch ? parseInt(employerIdMatch[1], 10) : null;
+
+      if (employerId !== null) {
+        try {
+          const appliesResult = await applyApiRequest.getAppliesByEmployerId(
+            employerId
+          );
+
+          if (Array.isArray(appliesResult.payload.data)) {
+            setAppliesListByEmployerId(appliesResult.payload.data);
+          } else {
+            setAppliesListByEmployerId([appliesResult.payload.data]);
+          }
+        } catch (error) {
+          console.error("An error occurred while fetching Applies by Employer:", error);
+        }
+      }
+    };
+
+    fetchAppliesByEmployer();
+  }, []);
+
   const checkApplicationStatus = async (jobId: number): Promise<boolean> => {
     const cookies = document.cookie;
     const userIdMatch = cookies.match(/userId=([^;]+)/);
@@ -62,11 +91,8 @@ export const ApplyProvider: React.FC<{ children: React.ReactNode }> = ({
 
     if (userId !== null) {
       try {
-        const result = await applyApiRequest.checkApplicationStatus(
-          userId,
-          jobId
-        ); // Gọi API kiểm tra
-        return result.payload === true; // Xử lý giá trị trả về (true/false)
+        const result = await applyApiRequest.checkApplicationStatus(userId, jobId);
+        return result.payload === true;
       } catch (error) {
         console.error("Error while checking application status:", error);
       }
@@ -79,6 +105,8 @@ export const ApplyProvider: React.FC<{ children: React.ReactNode }> = ({
       value={{
         appliesListByCandidateId,
         setAppliesListByCandidateId,
+        appliesListByEmployerId,
+        setAppliesListByEmployerId,
         checkApplicationStatus,
       }}
     >
