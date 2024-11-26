@@ -18,7 +18,6 @@ const ApplyJobForm: React.FC<ApplyJobFormProps> = ({
   isOpen,
   onClose,
   cvList,
-  candidateId,
   job,
 }) => {
   const [formData, setFormData] = useState({
@@ -29,6 +28,9 @@ const ApplyJobForm: React.FC<ApplyJobFormProps> = ({
   });
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [sourceSelected, setSourceSelected] = useState<string>(
+    cvList ? String(cvList[0]?.candidateCvId) : ""
+  );
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -71,25 +73,13 @@ const ApplyJobForm: React.FC<ApplyJobFormProps> = ({
     }
   };
 
-  const [sourceSelected, setSourceSelected] = useState<string>("");
-
   const handleOptionChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedSource = event.target.value;
-    setSourceSelected(selectedSource);
-    const selectedCv = cvList?.find(
-      (cv) => String(cv.candidateCvId) === String(candidateId)
-    );
-    if (selectedCv) {
-      setFormData((prevState) => ({
-        ...prevState,
-        coverLetter: `Nhập nội dung thư xin việc cho vị trí ${job?.title}:`,
-      }));
-    } else {
-      setFormData((prevState) => ({
-        ...prevState,
-        coverLetter: "",
-      }));
-    }
+    const selectedCvId = event.target.value; // Lấy giá trị `candidateCvId` được chọn
+    setSourceSelected(selectedCvId); // Cập nhật trạng thái `sourceSelected`
+    setFormData((prevState) => ({
+      ...prevState,
+      candidateCvId: selectedCvId ? Number(selectedCvId) : null, // Cập nhật `candidateCvId`
+    }));
   };
 
   if (!isOpen) return null;
@@ -124,13 +114,6 @@ const ApplyJobForm: React.FC<ApplyJobFormProps> = ({
           <form className="p-4" onSubmit={handleSubmit}>
             <div className="grid gap-4 mb-4 grid-cols-2">
               <div className="col-span-2">
-                <label className="block mb-2 text-sm font-bold text-black">
-                  {/* Le Van Phuc + {"sl hồ sơ: " + cvList?.length + " canId: " + candidateId + " jobId: " + job?.jobId}
-                  <p className="text-black">levanphuc@gmail.com</p> */}
-                </label>
-              </div>
-
-              <div className="col-span-2">
                 <label className="block mb-2 text-sm font-bold text-black">Chọn CV</label>
                 <select
                   id="cvSelect"
@@ -139,14 +122,18 @@ const ApplyJobForm: React.FC<ApplyJobFormProps> = ({
                   value={sourceSelected}
                 >
                   <option value="" disabled>Chọn CV từ danh sách</option>
-                  {cvList && cvList.map((cv) => (
-                    <option key={cv.candidateCvId} value={cv.candidateCvId}>{cv.title}</option>
-                  ))}
+                  {cvList &&
+                    cvList.map((cv) => (
+                      <option key={cv.candidateCvId} value={cv.candidateCvId}>
+                        {cv.title}
+                      </option>
+                    ))}
                 </select>
               </div>
-
               <div className="col-span-2">
-                <label htmlFor="coverLetter" className="block mb-2 text-sm font-bold text-black">Thư xin việc</label>
+                <label htmlFor="coverLetter" className="block mb-2 text-sm font-bold text-black">
+                  Thư xin việc
+                </label>
                 <textarea
                   id="coverLetter"
                   rows={8}
@@ -159,7 +146,10 @@ const ApplyJobForm: React.FC<ApplyJobFormProps> = ({
               </div>
             </div>
             <div className="flex justify-center">
-              <button type="submit" className="text-white bg-green-600 hover:bg-green-700 font-medium rounded-lg text-sm px-5 py-2.5">
+              <button
+                type="submit"
+                className="text-white bg-green-600 hover:bg-green-700 font-medium rounded-lg text-sm px-5 py-2.5"
+              >
                 Nộp
               </button>
             </div>
