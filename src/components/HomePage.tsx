@@ -1,279 +1,382 @@
 "use client";
-import { JobListResType } from "@/app/schemaValidations/job.schema";
 import Link from "next/link";
-import { AiOutlineRight, AiOutlineLeft } from "react-icons/ai"; // Thêm AiOutlineLeft
-import { useState } from "react";
+import { AiOutlineRight, AiOutlineLeft } from "react-icons/ai";
+import { useState, useEffect } from "react"; // Thêm useEffect
+import { useJobContext } from "@/app/context/JobContext";
+import {
+  FilterJobListResType,
+  Job
+} from "@/app/schemaValidations/job.schema";
+import Banner from "./Banner";
 
-export default function HomePage({
-  jobList,
-}: {
-  jobList: JobListResType["data"] | null;
-}) {
-  const [currentPage, setCurrentPage] = useState(0); // Trang hiện tại
-  const jobsPerPage = 9; // Số công việc trên mỗi trang
+// hàm dùng để lọc các ký tự
+const normalizeString = (str: string) => {
+  return str
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, '') // Loại bỏ dấu
+    .replace(/\s+/g, '') // Loại bỏ khoảng trắng (tùy chọn)
+    .replace(/-/g, '');  // Loại bỏ dấu gạch ngang
 
-  if (!jobList) {
-    return (
-      <div className="text-center text-red-500">Không có công việc nào.</div>
-    );
+}
+
+export default function HomePage() {
+  // Thay đổi 1: Sử dụng allJobListContext thay vì jobListContext
+  const { allJobListContext } = useJobContext();
+  const [jobTypes, setJobType] = useState<string[]>([]);
+  const [jobRanks, setJobRank] = useState<string[]>([]);
+
+  // Thay đổi 2: Khởi tạo filteredJobs là mảng rỗng
+  const [filteredJobs, setFilteredJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(0);
+
+  const [filters, setFilters] = useState<FilterJobListResType>({
+    title: "",
+    location: "",
+    salaryMin: "",
+    salaryMax: "",
+    jobType: "",
+    jobRank: "",
+    companyName: ""
+  });
+
+  // Thay đổi 3: Thêm useEffect để cập nhật filteredJobs khi context thay đổi
+  useEffect(() => {
+    if (allJobListContext) {
+
+      setFilteredJobs(allJobListContext);
+
+      const uniqueJobTypes = Array.from(
+        new Set(allJobListContext.map(job => job.jobType))
+      ).filter(Boolean).sort();
+
+      const uniqueJobRanks = Array.from(
+        new Set(allJobListContext.map(job => job.jobRank))
+      ).filter(Boolean).sort();
+
+      setJobType(uniqueJobTypes);
+      setJobRank(uniqueJobRanks);
+
+    }
+  }, [allJobListContext]);
+
+  // Thay đổi 4: Cập nhật điều kiện loading
+  if (!allJobListContext) {
+    return <div className="text-center text-red-500">Đang tải dữ liệu...</div>;
   }
 
-  // Tính toán tổng số trang
-  const totalPages = Math.ceil(jobList.length / jobsPerPage);
-
-  // Tính toán công việc hiển thị trên trang hiện tại
-  const currentJobs = jobList.slice(
+  const jobsPerPage = 15;
+  const totalPages = Math.ceil(filteredJobs.length / jobsPerPage);
+  const currentJobs = filteredJobs.slice(
     currentPage * jobsPerPage,
     (currentPage + 1) * jobsPerPage
   );
 
-  // Hàm chuyển sang trang tiếp theo
+  // Thay đổi 5: Thêm xử lý filter thực tế
+  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFilters(prev => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    // Thay đổi 6: Thêm logic lọc trực tiếp
+    const newFilters = {
+      ...filters,
+      [name]: value,
+    };
+
+    // Nếu tất cả các job filter đều trống, hiển thị tất cả các jobs
+    const hasAtiveFilter = Object.values(newFilters).some(filters => filters !== "");
+
+    if (!hasAtiveFilter) {
+      setFilteredJobs(allJobListContext);
+      return;
+    }
+
+    const filtered = allJobListContext.filter((job) => {
+      return (
+        (!newFilters.title ||
+          normalizeString(job.title).includes(normalizeString(newFilters.title))) &&
+        (!newFilters.location ||
+          normalizeString(job.jobLocation).includes(normalizeString(newFilters.location))) &&
+        (!newFilters.salaryMin || job.salary >= parseInt(newFilters.salaryMin)) &&
+        (!newFilters.salaryMax || job.salary <= parseInt(newFilters.salaryMax)) &&
+        (!newFilters.jobType || job.jobType === newFilters.jobType) &&
+        (!newFilters.jobRank || job.jobRank === newFilters.jobRank) &&
+        (!newFilters.companyName || 
+          normalizeString(job.companyName).includes(normalizeString(newFilters.companyName)))
+      );
+    });
+
+    setFilteredJobs(filtered);
+    setCurrentPage(0);
+  };
+
+
+
+  // Hàm dùng để reset jobs
+  const handleResetFilters = () => {
+    setFilters({
+      title: "",
+      location: "",
+      salaryMin: "",
+      salaryMax: "",
+      jobType: "",
+      jobRank: "",
+      companyName: ""
+    });
+    setFilteredJobs(allJobListContext);
+    setCurrentPage(0);
+  }
+
   const handleNextPage = () => {
     if (currentPage < totalPages - 1) {
       setCurrentPage(currentPage + 1);
     }
   };
 
-  // Hàm quay lại trang trước
   const handlePrevPage = () => {
     if (currentPage > 0) {
       setCurrentPage(currentPage - 1);
     }
   };
 
+  // Hàm tìm kiếm bên banner 
+
+  // Sửa lại hàm handleBannerSearch để giống với handleFilterChange
+  const handleBannerSearch = async (searchTerm: string) => {
+    try {
+      setLoading(true);
+  
+      const searchTerms = searchTerm.split(',').map(term => term.trim());
+  
+      const filtered = allJobListContext.filter(job => {
+        return searchTerms.some(term => {
+          const normalizedTerm = normalizeString(term);
+          
+          const matchTitle = normalizeString(job.title).includes(normalizedTerm);
+          const matchLocation = normalizeString(job.jobLocation).includes(normalizedTerm);
+          const matchJobType = normalizeString(job.jobType).includes(normalizedTerm);
+          const matchCompany = normalizeString(job.companyName).includes(normalizedTerm); // Thêm dòng này
+  
+          return matchTitle || matchLocation || matchJobType || matchCompany;
+        });
+      });
+  
+      const newFilters = { ...filters };
+      
+      searchTerms.forEach(term => {
+        const normalizedTerm = normalizeString(term);
+  
+        const matchingJobs = allJobListContext.filter(job => {
+          const matchTitle = normalizeString(job.title).includes(normalizedTerm);
+          const matchLocation = normalizeString(job.jobLocation).includes(normalizedTerm);
+          const matchJobType = normalizeString(job.jobType).includes(normalizedTerm);
+          const matchCompany = normalizeString(job.companyName).includes(normalizedTerm); // Thêm dòng này
+  
+          if (matchJobType) newFilters.jobType = job.jobType;
+          else if (matchLocation) newFilters.location = job.jobLocation;
+          else if (matchCompany) newFilters.companyName = job.companyName; // Thêm dòng này
+          else if (matchTitle) newFilters.title = term;
+  
+          return matchTitle || matchLocation || matchJobType || matchCompany;
+        });
+  
+        if (matchingJobs.length === 0) {
+          newFilters.title = term;
+        }
+      });
+  
+      setFilters(newFilters);
+      setFilteredJobs(filtered);
+      document.getElementById('jobList')?.scrollIntoView({ behavior: 'smooth' });
+  
+    } catch (error) {
+      console.error('Lỗi search jobs:', error);
+    } finally {
+      setLoading(false);
+      setCurrentPage(0);
+    }
+  };
   return (
-    <div className="overflow-hidden bg-gray-1 pb-12 pt-20 dark:bg-dark-2 lg:pb-[90px] lg:pt-[40px]">
-      <div className="container mx-auto">
-        {/* Tiêu đề và nút Xem tất cả */}
-        <div className="flex items-center justify-between mb-7">
-          <h2 className="text-xl font-bold leading-tight sm:text-xl">
-            Việc làm hấp dẫn
-          </h2>
-          <Link href="/jobs">
-            <button className="text-sm text-blue-500 hover:underline flex items-center">
-              Xem tất cả
-              <AiOutlineRight className="ml-1" />
-            </button>
-          </Link>
-        </div>
+    <>
+      <Banner onSearch={handleBannerSearch} />
+      <div id="jobList" className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 pb-12 pt-20 dark:from-gray-800 dark:to-gray-900">
+        <div className="container mx-auto px-4">
+          {/* Search Results */}
+          {filters.title && (
+            <div className="mb-6 rounded-lg bg-blue-50 p-4 text-blue-700 dark:bg-blue-900/30 dark:text-blue-200">
+              <span className="font-medium">Kết quả tìm kiếm cho {filters?.title}:</span> {filteredJobs?.length} công việc
+            </div>
+          )}
 
-        {/* Danh sách công việc */}
-        <div className="flex flex-wrap justify-center -mx-4">
-          {currentJobs.map((job) => (
-            <div
-              key={job.jobId}
-              className="w-full px-4 sm:w-1/2 lg:w-1/3 xl:w-1/3 relative mb-6"
-            >
-              <Link href={`/jobs/${job.jobId}`}>
-                <div className="block bg-white group rounded-xl shadow-testimonial dark:bg-dark dark:shadow-none relative border border-yellow-900 rounded-lg cursor-pointer">
-                  <div className="flex">
-                    <div className="flex-shrink-0 p-4">
-                      <img
-                        src="https://cdn.tailgrids.com/1.0/assets/images/team/image-07/image-01.png"
-                        alt="team image"
-                        className="h-[60px] w-[60px] rounded-full"
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* Filters Sidebar */}
+            <div className="lg:w-1/4">
+              <div className="sticky top-24 rounded-xl bg-white p-6 shadow-lg transition-all hover:shadow-xl dark:bg-gray-800">
+                <div className="mb-6 flex items-center justify-between">
+                  <h3 className="text-lg font-bold text-gray-800 dark:text-white">
+                    Bộ lọc tìm kiếm
+                  </h3>
+                  <button
+                    onClick={handleResetFilters}
+                    className="rounded-lg bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300"
+                  >
+                    Đặt lại
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  {/* Filter Inputs */}
+                  <div className="space-y-4">
+                    <input
+                      type="text"
+                      name="title"
+                      value={filters.title}
+                      onChange={handleFilterChange}
+                      placeholder="Tiêu đề công việc"
+                      className="w-full rounded-lg border border-gray-200 p-3 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800"
+                    />
+                    <input
+                      type="text"
+                      name="location"
+                      value={filters.location}
+                      onChange={handleFilterChange}
+                      placeholder="Địa điểm"
+                      className="w-full rounded-lg border border-gray-200 p-3 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800"
+                    />
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <input
+                        type="number"
+                        name="salaryMin"
+                        value={filters.salaryMin}
+                        onChange={handleFilterChange}
+                        placeholder="Lương tối thiểu"
+                        className="w-full rounded-lg border border-gray-200 p-3 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800"
+                      />
+                      <input
+                        type="number"
+                        name="salaryMax"
+                        value={filters.salaryMax}
+                        onChange={handleFilterChange}
+                        placeholder="Lương tối đa"
+                        className="w-full rounded-lg border border-gray-200 p-3 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800"
                       />
                     </div>
-                    <div className="flex-1 p-4 mx-2 min-w-0">
-                      <div className="text-left">
-                        <p
-                          className="text-sm mb-2 font-bold text-dark dark:text-black truncate"
-                          title={job.title}
-                        >
-                          {job.title}
-                        </p>
-                        <p
-                          className="text-sm mb-2 font-normal text-dark dark:text-black truncate"
-                          title={job.companyName}
-                        >
-                          {job.companyName}
-                        </p>
-                        <p
-                          className="text-xs mb-2 font-normal text-dark dark:text-black truncate"
-                          title={job.jobLocation}
-                        >
-                          {job.jobLocation}
-                        </p>
-                        <p className="text-xs mb-2 font-normal text-dark dark:text-black truncate">
-                          {job.salary
-                            ? `${job.salary} Vnđ`
-                            : "Mức lương không xác định"}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  {/* Nút lưu */}
-                  <div className="absolute top-2 right-2">
-                    <button className="bg-transparent rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5 text-red-500"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-                        />
-                      </svg>
-                    </button>
+
+                    <select
+                      name="jobType"
+                      value={filters.jobType}
+                      onChange={handleFilterChange}
+                      className="w-full rounded-lg border border-gray-200 p-3 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800"
+                    >
+                      <option value="">Loại hình công việc</option>
+                      {jobTypes.map((type) => (
+                        <option key={type} value={type}>{type}</option>
+                      ))}
+                    </select>
+
+                    <select
+                      name="jobRank"
+                      value={filters.jobRank}
+                      onChange={handleFilterChange}
+                      className="w-full rounded-lg border border-gray-200 p-3 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800"
+                    >
+                      <option value="">Cấp bậc</option>
+                      {jobRanks.map((rank) => (
+                        <option key={rank} value={rank}>{rank}</option>
+                      ))}
+                    </select>
+
+                    {/* Thêm input này vào phần Filter Inputs */}
+                    <input
+                      type="text"
+                      name="companyName"
+                      value={filters.companyName}
+                      onChange={handleFilterChange}
+                      placeholder="Tên công ty"
+                      className="w-full rounded-lg border border-gray-200 p-3 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800"
+                    />
                   </div>
                 </div>
-              </Link>
+              </div>
             </div>
-          ))}
-        </div>
 
-        {/* Nút phân trang nằm ngoài danh sách công việc nhưng trong container */}
-        <div className="flex justify-between items-center mb-6 mt-4">
-          <button
-            className="text-sm bg-blue-500 text-white px-3 py-1 rounded-lg"
-            onClick={handlePrevPage}
-            disabled={currentPage === 0}
-          >
-            <AiOutlineLeft className="inline-block mr-1" />{" "}
-            {/* Icon mũi tên trái */}
-            Trang trước
-          </button>
-
-          {/* Div để giữ cho thông tin trang nằm giữa */}
-          <div className="flex-1 text-center">
-            <p className="text-sm">
-              Trang {currentPage + 1} / {totalPages}
-            </p>
-          </div>
-
-          <button
-            className="text-sm bg-blue-500 text-white px-3 py-1 rounded-lg"
-            onClick={handleNextPage}
-            disabled={currentPage === totalPages - 1}
-          >
-            Trang sau
-            <AiOutlineRight className="inline-block ml-1" />{" "}
-            {/* Icon mũi tên phải */}
-          </button>
-        </div>
-      </div>
-
-      <hr></hr>
-      {/* // Việc làm theo ngành nghềeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee */}
-      <div className="container mx-auto">
-        {/* Tiêu đề và nút Xem tất cả */}
-        <div className="flex items-center justify-between mb-7">
-          <h2 className="text-xl font-bold leading-tight sm:text-xl">
-            Việc làm hấp dẫn
-          </h2>
-          <Link href="/jobs">
-            <button className="text-sm text-blue-500 hover:underline flex items-center">
-              Xem tất cả
-              <AiOutlineRight className="ml-1" />
-            </button>
-          </Link>
-        </div>
-
-        {/* Danh sách công việc */}
-        <div className="flex flex-wrap justify-center -mx-4">
-          {currentJobs.map((job) => (
-            <div
-              key={job.jobId}
-              className="w-full px-4 sm:w-1/2 lg:w-1/3 xl:w-1/3 relative mb-6"
-            >
-              <Link href={`/jobs/${job.jobId}`}>
-                <div className="block bg-white group rounded-xl shadow-testimonial dark:bg-dark dark:shadow-none relative border border-yellow-900 rounded-lg cursor-pointer">
-                  <div className="flex">
-                    <div className="flex-shrink-0 p-4">
-                      <img
-                        src="https://cdn.tailgrids.com/1.0/assets/images/team/image-07/image-01.png"
-                        alt="team image"
-                        className="h-[60px] w-[60px] rounded-full"
-                      />
-                    </div>
-                    <div className="flex-1 p-4 mx-2 min-w-0">
-                      <div className="text-left">
-                        <p
-                          className="text-sm mb-2 font-bold text-dark dark:text-black truncate"
-                          title={job.title}
-                        >
-                          {job.title}
-                        </p>
-                        <p
-                          className="text-sm mb-2 font-normal text-dark dark:text-black truncate"
-                          title={job.companyName}
-                        >
-                          {job.companyName}
-                        </p>
-                        <p
-                          className="text-xs mb-2 font-normal text-dark dark:text-black truncate"
-                          title={job.jobLocation}
-                        >
-                          {job.jobLocation}
-                        </p>
-                        <p className="text-xs mb-2 font-normal text-dark dark:text-black truncate">
-                          {job.salary
-                            ? `${job.salary} Vnđ`
-                            : "Mức lương không xác định"}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  {/* Nút yêu thích */}
-                  <div className="absolute top-2 right-2">
-                    <button className="bg-transparent rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5 text-red-500"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-                        />
-                      </svg>
-                    </button>
-                  </div>
+            {/* Job List */}
+            <div className="lg:w-3/4">
+              {loading ? (
+                <div className="flex h-40 items-center justify-center">
+                  <div className="h-10 w-10 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
                 </div>
-              </Link>
+              ) : currentJobs.length === 0 ? (
+                <div className="rounded-lg bg-white p-8 text-center text-gray-500 dark:bg-gray-800">
+                  Không tìm thấy công việc phù hợp
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {currentJobs.map((job) => (
+                    <Link key={job.jobId} href={`/jobs/${job.jobId}`}>
+                      <div className="group h-full overflow-hidden rounded-xl bg-white p-5 shadow-sm transition-all hover:shadow-lg dark:bg-gray-800">
+                        <div className="flex items-start gap-4">
+                          <img
+                            src="https://cdn.tailgrids.com/1.0/assets/images/team/image-07/image-01.png"
+                            alt="company logo"
+                            className="h-12 w-12 rounded-lg object-cover"
+                          />
+                          <div className="flex-1 space-y-2">
+                            <h3 className="line-clamp-2 font-medium text-gray-900 group-hover:text-blue-600 dark:text-white">
+                              {job.title}
+                            </h3>
+                            <div className="space-y-1">
+                              <p className="text-sm text-gray-600 dark:text-gray-400">
+                                {job.companyName}
+                              </p>
+                              <div className="flex flex-wrap gap-2">
+                                <span className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                                  {job.jobLocation}
+                                </span>
+                                <span className="inline-flex items-center rounded-full bg-green-50 px-2.5 py-0.5 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-300">
+                                  {job.salary ? `${job.salary.toLocaleString()} VNĐ` : "Thương lượng"}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+
+              {/* Pagination */}
+              <div className="mt-8 flex items-center justify-between">
+                <button
+                  onClick={handlePrevPage}
+                  disabled={currentPage === 0}
+                  className="inline-flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:bg-gray-300 dark:disabled:bg-gray-600"
+                >
+                  <AiOutlineLeft className="mr-2" size={16} />
+                  Trang trước
+                </button>
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  Trang {currentPage + 1} / {totalPages}
+                </span>
+                <button
+                  onClick={handleNextPage}
+                  disabled={currentPage === totalPages - 1}
+                  className="inline-flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:bg-gray-300 dark:disabled:bg-gray-600"
+                >
+                  Trang sau
+                  <AiOutlineRight className="ml-2" size={16} />
+                </button>
+              </div>
             </div>
-          ))}
-        </div>
-
-        {/* Nút phân trang nằm ngoài danh sách công việc nhưng trong container */}
-        <div className="flex justify-between items-center mb-6 mt-4">
-          <button
-            className="text-sm bg-blue-500 text-white px-3 py-1 rounded-lg"
-            onClick={handlePrevPage}
-            disabled={currentPage === 0}
-          >
-            <AiOutlineLeft className="inline-block mr-1" />{" "}
-            {/* Icon mũi tên trái */}
-            Trang trước
-          </button>
-
-          {/* Div để giữ cho thông tin trang nằm giữa */}
-          <div className="flex-1 text-center">
-            <p className="text-sm">
-              Trang {currentPage + 1} / {totalPages}
-            </p>
           </div>
-
-          <button
-            className="text-sm bg-blue-500 text-white px-3 py-1 rounded-lg"
-            onClick={handleNextPage}
-            disabled={currentPage === totalPages - 1}
-          >
-            Trang sau
-            <AiOutlineRight className="inline-block ml-1" />{" "}
-            {/* Icon mũi tên phải */}
-          </button>
         </div>
       </div>
-    </div>
+    </>
   );
 }

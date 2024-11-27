@@ -100,6 +100,21 @@ export const LevelListRes = z.object({
   message: z.string(),       // Thông báo kết quả
 });
 
+// BỘ LỌC
+export const Jobfilter = z.object({
+
+  title: z.string().optional(),
+  location :z.string().optional(),
+  salaryMin : z.string().optional(),
+  salaryMax: z.string().optional(),
+  jobType :z.string().optional(),
+  jobRank : z.string().optional(),
+  companyName: z.string()
+})
+export type Job = z.infer<typeof Job>;
+
+export type FilterJobListResType = z.TypeOf <typeof Jobfilter>;
+
 // Định nghĩa type dựa trên schema mới
 export type LevelResType = z.TypeOf<typeof LevelRes>;
 export type LevelCreateBodyType = z.TypeOf<typeof LevelCreateBody>;

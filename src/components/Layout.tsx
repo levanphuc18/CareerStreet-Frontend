@@ -2,7 +2,7 @@
 import React, { ReactNode } from 'react';
 import Header from './Header';
 // import HomePage from '@/app/HomePage';
-import Banner from './Banner';
+// import Banner from './Banner';
 import Footer from './Footer';
 // import HomePage from '@/app/HomePage';
 
@@ -14,7 +14,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     return (
         <div>
             <Header />
-            <Banner />
+            {/* <Banner /> */}
             <div className="p-4 text-xs">
                 {children}
             </div>
