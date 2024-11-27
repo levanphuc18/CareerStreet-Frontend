@@ -22,7 +22,7 @@ export default function CvsPage({
       router.push("/candidate/cvs");
       router.refresh();
     } catch (error) {
-      Alert.error("Lỗi", "Lỗi khi xóa CV");
+      Alert.error("Lỗi", "Lỗi khi xóa hồ sơ");
     }
   };
   
