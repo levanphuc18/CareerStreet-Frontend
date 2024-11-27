@@ -14,6 +14,8 @@ import { useRouter } from "next/navigation";
 import { CvListResType } from "@/app/schemaValidations/cv.schema";
 import { TechListResType } from "@/app/schemaValidations/tech.schema";
 import { useApplyContext } from "@/app/context/ApplyContext";
+import ApiRequestSave from "@/app/apiRequest/save";
+import { toast } from "react-toastify";
 
 const calculateDaysLeft = (
   postingDate?: string | Date,
@@ -73,19 +75,33 @@ export default function JobsPage({
     console.log("Updated username:", username); // Kiểm tra xem username đã cập nhật chưa
   }, []);
 
-  const handleSaveJob = () => {
-    const username = getCookie("username"); // Lấy giá trị username từ cookie
-    console.log("username:", username); // Kiểm tra giá trị username trong cookie
+  const handleSaveJob = async () => {
+    const username = getCookie("username");
 
     if (!username) {
-      alert("Bạn cần đăng nhập để lưu công việc."); // Thông báo nếu chưa đăng nhập
-      router.push("/login"); // Điều hướng đến trang đăng nhập
-      return; // Dừng thực thi nếu chưa đăng nhập
+      alert("Bạn cần đăng nhập để lưu công việc.");
+      router.push("/login");
+      return;
     }
 
-    // Logic lưu công việc
-    console.log("Đã lưu công việc thành công!"); // Thực hiện lưu công việc
-    // Bạn có thể gọi API để lưu công việc ở đây
+    if (!candidateId || !job?.jobId) {
+      alert("Thiếu thông tin cần thiết để lưu công việc.");
+      return;
+    }
+
+    try {
+      const response = await ApiRequestSave.CreateSave({
+        candidateId,
+        jobId: job.jobId,
+        Date: new Date().toISOString(),
+      });
+
+      if (response.status === 200) {
+        toast.success("Công việc đã được lưu thành công!");
+      }
+    } catch (error) {
+      alert("Công việc này đã được lưu.");
+    }
   };
 
   const handleCloseModal = () => {
@@ -127,59 +143,59 @@ export default function JobsPage({
             />
           </div>
           {/* New Job Post: IT Security Manager */}
-          <div className="job-meta mb-4 mt-8">
-            <h1 className="job-title text-2xl font-bold">{job?.title}</h1>
-            <span className="job-type bg-teal-500 text-white p-1 text-xs mr-4">
-              <MdWork className="inline mr-1" /> {/* Icon loại công việc */}
-              {job?.jobType}
-            </span>
+          <div className="job-meta mb-8 text-xs">
+                <h1 className="job-title mb-4 text-3xl font-bold text-gray-900 dark:text-white">
+                  {job?.title}
+                </h1>
+                
+                <div className="flex flex-wrap gap-4 mb-4">
+                  <span className="flex items-center rounded-full bg-teal-100 px-4 py-2 text-sm text-teal-700 dark:bg-teal-900/30 dark:text-teal-300">
+                    <MdWork className="mr-2" />
+                    {job?.jobType}
+                  </span>
+                  <span className="flex items-center rounded-full bg-blue-100 px-4 py-2 text-sm text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                    <MdLocationOn className="mr-2" />
+                    {job?.jobLocation}
+                  </span>
+                  <span className="flex items-center rounded-full bg-green-100 px-4 py-2 text-sm text-green-700 dark:bg-green-900/30 dark:text-green-300">
+                    <MdAttachMoney className="mr-2" />
+                    {job?.salary.toLocaleString()} VND
+                  </span>
+                </div>
 
-            <div className="flex items-center mb-2">
-              <MdLocationOn className="mr-2" /> {/* Icon địa điểm */}
-              <p className="job-location">{job?.jobLocation}</p>
-            </div>
+                <div className="flex items-center text-gray-600 dark:text-gray-300 mb-4">
+                  <MdCalendarToday className="mr-2" />
+                  <span>Ngày đăng tuyển: <span className="font-medium">{job?.postingDate}</span> | 
+                  Hết hạn trong: <span className="font-medium">{daysLeft} ngày</span></span>
+                </div>
 
-            <div className="flex items-center mb-2">
-              <MdAttachMoney className="mr-2" /> {/* Icon tiền */}
-              <p className="job-salary">{job?.salary} Vnđ</p>
-            </div>
-
-            <span className="flex items-center mb-2">
-              <MdCalendarToday className="mr-2" /> {/* Icon lịch */}
-              Ngày đăng tuyển:{" "}
-              <span className="font-bold">{job?.postingDate}</span> | Hết hạn
-              trong: <span className="font-bold"> {daysLeft} ngày</span>
-            </span>
-
-            <div className="flex items-center mb-2">
-              <MdAttachMoney className="mr-2" /> {/* Icon tiền */}
-              <p className="job-numberOfRecruitment">
-                Số lượng tuyển: {job?.numberOfRecruitment} Người
-              </p>
-            </div>
-          </div>
+                <div className="flex items-center text-gray-600 dark:text-gray-300">
+                  <MdAttachMoney className="mr-2" />
+                  <span>Số lượng tuyển: <span className="font-medium">{job?.numberOfRecruitment} Người</span></span>
+                </div>
+              </div>
           <div className="flex items-center space-x-2 mb-4">
-            <a
-              href="#"
-              className={`border border-teal-500 ${
-                isApplied
-                  ? "bg-gray-500 text-white cursor-not-allowed" // Thêm cursor-not-allowed cho trạng thái vô hiệu hóa
-                  : "bg-transparent hover:bg-teal-500 hover:text-white text-teal-500"
-              } text-center block rounded-full py-2 px-6 transition-colors duration-300`}
-              onClick={isApplied ? undefined : handleOpenModal} // Vô hiệu hóa hành động click khi isApplied
-              aria-disabled={isApplied} // Thêm thuộc tính trợ năng (accessibility)
-            >
-              {isApplied ? "Bạn đã ứng tuyển" : "Nộp đơn ngay"}
-            </a>
+          <a
+  href="#"
+  className={`flex items-center justify-center rounded-lg border-2 ${
+    isApplied
+      ? "bg-gray-500 text-white cursor-not-allowed" // Trạng thái vô hiệu hóa
+      : "border-teal-600 text-teal-600 hover:bg-teal-50 dark:hover:bg-teal-900/20"
+  } px-6 py-3 transition-all`}
+  onClick={isApplied ? undefined : handleOpenModal} // Vô hiệu hóa click khi đã ứng tuyển
+  aria-disabled={isApplied} // Thuộc tính trợ năng
+>
+  {isApplied ? "Bạn đã ứng tuyển" : "Nộp đơn ngay"}
+</a>
 
-            <a
-              href="#"
-              className="border border-teal-500 bg-transparent hover:bg-teal-500 hover:text-white text-teal-500 text-center block rounded-full py-2 px-4 transition-colors duration-300 flex items-center"
-              onClick={handleSaveJob} // Gọi hàm mở modal
-            >
-              <MdBookmark className="mr-2" />
-              Lưu
-            </a>
+<button
+  onClick={handleSaveJob}
+  className="flex items-center justify-center rounded-lg border-2 border-teal-600 px-6 py-3 text-teal-600 transition-all hover:bg-teal-50 dark:hover:bg-teal-900/20"
+>
+  <MdBookmark className="mr-2" />
+  Lưu công việc
+</button>
+
           </div>
           <div className="job-description mb-4">
             <h3 className="text-xl font-semibold text-purple-800 mb-4">
