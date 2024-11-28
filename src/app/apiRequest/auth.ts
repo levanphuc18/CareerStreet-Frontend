@@ -21,11 +21,11 @@ const authApiRequest={
           Authorization: `Bearer ${sessionToken}`
         }
       }),
-    updateIsActive: (username: string, isActive: boolean, sessionToken: string) =>
-      http.put<AccountResType>(`/user/update/is-active?username=${username}&isActive=${isActive}`,{
-        headers: {
-          Authorization: `Bearer ${sessionToken}`
-        }
-      }),
+      updateIsActive: (username: string, isActive: boolean, sessionToken: string) =>
+        http.put<boolean>(`/user/update/is-active?username=${username}&isActive=${isActive}`, {}, {
+          headers: {
+            Authorization: `Bearer ${sessionToken}`
+          }
+        }),
 }
 export default authApiRequest

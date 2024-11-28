@@ -249,7 +249,7 @@ export default function Header() {
                 <li>
                   <Link
                     className="text-xs block px-4 py-2 text-gray-700 hover:bg-purple-100 hover:text-purple-600 transition-colors duration-200"
-                    href="candidate/saved"
+                    href="/candidate/saved"
                   >
                     Việc đã lưu
                   </Link>

@@ -14,19 +14,23 @@ export default function CandidateManagementPage() {
     if (sessionTokenMatch) {
       setSessionToken(sessionTokenMatch[1]);
     }
+    console.log("sessionToken:", sessionTokenMatch ? sessionTokenMatch[1] : "Không có token");
   }, []); // Chạy 1 lần khi component mount
 
-  const { getAccountsListByRoleId, accountsList } = useAccountContext();
+  const { getAccountsListByRoleId, accountsList, setAccountsList } = useAccountContext();
 
   const [searchTerm, setSearchTerm] = useState(""); // State cho từ khóa tìm kiếm
   const [filterStatus, setFilterStatus] = useState("Tất cả"); // State cho bộ lọc trạng thái
   const [roleId] = useState(3); // RoleId mặc định (có thể tùy chỉnh)
 
   useEffect(() => {
+    console.log("roleId:", roleId);
+    console.log("sessionToken:", sessionToken);
     if (roleId && sessionToken) {
-      getAccountsListByRoleId(roleId, sessionToken); // Gọi API chỉ khi có sessionToken
+      console.log("Gọi API để lấy danh sách tài khoản");
+      getAccountsListByRoleId(roleId, sessionToken);
     }
-  }, [roleId, sessionToken, getAccountsListByRoleId]);  
+  }, [roleId, sessionToken, getAccountsListByRoleId]);
 
   // Lấy danh sách tài khoản theo roleId từ context
   const candidates = accountsList[roleId] || [];
@@ -48,55 +52,31 @@ export default function CandidateManagementPage() {
   const handleUpdateIsActive = async (username: string, isActive: boolean) => {
     // Kiểm tra sessionToken trước khi gọi API
     if (!sessionToken) {
-        console.error("Session token không tồn tại hoặc không hợp lệ.");
-        return; // Dừng hàm nếu sessionToken không hợp lệ
+      console.error("Session token không tồn tại hoặc không hợp lệ.");
+      return; // Dừng hàm nếu sessionToken không hợp lệ
     }
-
-    if (roleId && sessionToken) {
-      try {
-        // Gọi API để cập nhật trạng thái isActive
-        const result = await authApiRequest.updateIsActive(
-            username,
-            isActive,
-            sessionToken
-        );
-        console.log("username ", username);
-        console.log("isActive ", isActive);
-        console.log("sessionToken ", sessionToken);
-
-        // Nếu API trả về kết quả thành công, bạn có thể cập nhật lại trạng thái trên giao diện
-        console.log("Cập nhật trạng thái thành công:", result);
+  
+    try {
+      console.log("sessionToken:", sessionToken);
+      // Gọi API để cập nhật trạng thái isActive
+      await authApiRequest.updateIsActive(username, isActive, sessionToken);
+      console.log("Cập nhật trạng thái thành công");
+  
+      // Cập nhật danh sách ứng viên trong state
+      const updatedCandidates = candidates.map((candidate) =>
+        candidate.username === username
+          ? { ...candidate, active: isActive } // Cập nhật trạng thái của ứng viên
+          : candidate
+      );
+  
+      // Thay đổi state trong context hoặc local state
+      const updatedAccountsList = { ...accountsList, [roleId]: updatedCandidates };
+      setAccountsList(updatedAccountsList); // Thay hàm này bằng hàm cập nhật context nếu cần
     } catch (error) {
-        console.log("username error ", username);
-        console.log("isActive error ", isActive);
-        console.log("sessionToken error ", sessionToken);
-        // Nếu có lỗi xảy ra, xử lý lỗi tại đây
-        console.error("Có lỗi xảy ra khi cập nhật trạng thái:", error);
+      console.error("Có lỗi xảy ra khi cập nhật trạng thái:", error);
     }
-    }
-
-    // try {
-    //     // Gọi API để cập nhật trạng thái isActive
-    //     const result = await authApiRequest.updateIsActive(
-    //         username,
-    //         isActive,
-    //         sessionToken
-    //     );
-    //     console.log("username ", username);
-    //     console.log("isActive ", isActive);
-    //     console.log("sessionToken ", sessionToken);
-
-    //     // Nếu API trả về kết quả thành công, bạn có thể cập nhật lại trạng thái trên giao diện
-    //     console.log("Cập nhật trạng thái thành công:", result);
-    // } catch (error) {
-    //     console.log("username error ", username);
-    //     console.log("isActive error ", isActive);
-    //     console.log("sessionToken error ", sessionToken);
-    //     // Nếu có lỗi xảy ra, xử lý lỗi tại đây
-    //     console.error("Có lỗi xảy ra khi cập nhật trạng thái:", error);
-    // }
-};
-
+  };
+  
 
   return (
     <div className="flex bg-gray-200">
@@ -125,8 +105,8 @@ export default function CandidateManagementPage() {
         <table className="min-w-full bg-white shadow-lg rounded-lg">
           <thead>
             <tr className="bg-blue-500 text-white">
-              <th className="py-4 px-6 text-left">Tên tài khoản</th>
-              <th className="py-4 px-6 text-left">Enail</th>
+              <th className="py-4 px-6 text-left">Tên tài khoản</th>
+              <th className="py-4 px-6 text-left">Email</th>
               <th className="py-4 px-6 text-left w-40">Trạng thái</th>
               <th className="py-4 px-6 text-left w-40">Hành động</th>
             </tr>
@@ -182,7 +162,7 @@ export default function CandidateManagementPage() {
               ))
             ) : (
               <tr>
-                <td colSpan={5} className="text-center py-4 text-gray-600">
+                <td colSpan={4} className="text-center py-4 text-gray-600">
                   Không có ứng viên nào để hiển thị.
                 </td>
               </tr>

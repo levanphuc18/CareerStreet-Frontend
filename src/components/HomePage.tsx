@@ -17,12 +17,11 @@ const normalizeString = (str: string) => {
     .replace(/[\u0300-\u036f]/g, '') // Loại bỏ dấu
     .replace(/\s+/g, '') // Loại bỏ khoảng trắng (tùy chọn)
     .replace(/-/g, '');  // Loại bỏ dấu gạch ngang
-
 }
 
 export default function HomePage() {
-  // Thay đổi 1: Sử dụng allJobListContext thay vì jobListContext
-  const { allJobListContext } = useJobContext();
+  // Thay đổi 1: Sử dụng jobListContext thay vì jobListContext
+  const { jobListContext } = useJobContext();
   const [jobTypes, setJobType] = useState<string[]>([]);
   const [jobRanks, setJobRank] = useState<string[]>([]);
 
@@ -43,26 +42,26 @@ export default function HomePage() {
 
   // Thay đổi 3: Thêm useEffect để cập nhật filteredJobs khi context thay đổi
   useEffect(() => {
-    if (allJobListContext) {
+    if (jobListContext) {
 
-      setFilteredJobs(allJobListContext);
+      setFilteredJobs(jobListContext);
 
       const uniqueJobTypes = Array.from(
-        new Set(allJobListContext.map(job => job.jobType))
+        new Set(jobListContext.map(job => job.jobType))
       ).filter(Boolean).sort();
 
       const uniqueJobRanks = Array.from(
-        new Set(allJobListContext.map(job => job.jobRank))
+        new Set(jobListContext.map(job => job.jobRank))
       ).filter(Boolean).sort();
 
       setJobType(uniqueJobTypes);
       setJobRank(uniqueJobRanks);
 
     }
-  }, [allJobListContext]);
+  }, [jobListContext]);
 
   // Thay đổi 4: Cập nhật điều kiện loading
-  if (!allJobListContext) {
+  if (!jobListContext) {
     return <div className="text-center text-red-500">Đang tải dữ liệu...</div>;
   }
 
@@ -91,11 +90,11 @@ export default function HomePage() {
     const hasAtiveFilter = Object.values(newFilters).some(filters => filters !== "");
 
     if (!hasAtiveFilter) {
-      setFilteredJobs(allJobListContext);
+      setFilteredJobs(jobListContext);
       return;
     }
 
-    const filtered = allJobListContext.filter((job) => {
+    const filtered = jobListContext.filter((job) => {
       return (
         (!newFilters.title ||
           normalizeString(job.title).includes(normalizeString(newFilters.title))) &&
@@ -127,7 +126,7 @@ export default function HomePage() {
       jobRank: "",
       companyName: ""
     });
-    setFilteredJobs(allJobListContext);
+    setFilteredJobs(jobListContext);
     setCurrentPage(0);
   }
 
@@ -152,7 +151,7 @@ export default function HomePage() {
   
       const searchTerms = searchTerm.split(',').map(term => term.trim());
   
-      const filtered = allJobListContext.filter(job => {
+      const filtered = jobListContext.filter(job => {
         return searchTerms.some(term => {
           const normalizedTerm = normalizeString(term);
           
@@ -170,7 +169,7 @@ export default function HomePage() {
       searchTerms.forEach(term => {
         const normalizedTerm = normalizeString(term);
   
-        const matchingJobs = allJobListContext.filter(job => {
+        const matchingJobs = jobListContext.filter(job => {
           const matchTitle = normalizeString(job.title).includes(normalizedTerm);
           const matchLocation = normalizeString(job.jobLocation).includes(normalizedTerm);
           const matchJobType = normalizeString(job.jobType).includes(normalizedTerm);

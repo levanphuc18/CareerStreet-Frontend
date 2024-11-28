@@ -7,11 +7,13 @@ type AccountContextType = {
     roleId: number,
     sessionToken: string
   ) => Promise<void>;
+  setAccountsList: React.Dispatch<React.SetStateAction<{ [roleId: number]: AccountListResType["data"] | null }>>;  // Thêm setAccountsList vào đây
   accountsList: { [roleId: number]: AccountListResType["data"] | null };
 };
 
 const AccountContext = createContext<AccountContextType>({
   getAccountsListByRoleId: async () => {},
+  setAccountsList: () => {},  // Thêm hàm setAccountsList mặc định
   accountsList: {},
 });
 
@@ -21,7 +23,7 @@ export const AccountProvider: React.FC<{ children: React.ReactNode }> = ({
   const [accountsList, setAccountsList] = useState<{
     [roleId: number]: AccountListResType["data"] | null;
   }>({});
-  
+
   const getAccountsListByRoleId = async (
     roleId: number,
     sessionToken: string
@@ -51,11 +53,11 @@ export const AccountProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  
   return (
     <AccountContext.Provider
       value={{
         getAccountsListByRoleId,
+        setAccountsList,  // Cung cấp setAccountsList ở đây
         accountsList,
       }}
     >

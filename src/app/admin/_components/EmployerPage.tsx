@@ -2,27 +2,26 @@
 import { useAccountContext } from "@/app/context/AccountContext";
 import React, { useEffect, useState } from "react";
 import { FaLock, FaUnlock } from "react-icons/fa";
+import authApiRequest from "@/app/apiRequest/auth";  // Thêm import API nếu chưa có
 
 export default function EmployerManagementPage({
   sessionToken,
 }: {
   sessionToken: string;
 }) {
-  const { getAccountsListByRoleId, accountsList } = useAccountContext();
-  const [searchTerm, setSearchTerm] = useState(""); // State cho từ khóa tìm kiếm
-  const [filterStatus, setFilterStatus] = useState("Tất cả"); // State cho bộ lọc trạng thái
-  const [roleId] = useState(2); // RoleId mặc định (có thể tùy chỉnh)
+  const { getAccountsListByRoleId, accountsList, setAccountsList } = useAccountContext();
+  const [searchTerm, setSearchTerm] = useState(""); 
+  const [filterStatus, setFilterStatus] = useState("Tất cả"); 
+  const [roleId] = useState(2); 
 
   useEffect(() => {
     if (roleId && sessionToken) {
-      getAccountsListByRoleId(roleId, sessionToken); // Gọi API lấy danh sách tài khoản
+      getAccountsListByRoleId(roleId, sessionToken); 
     }
   }, [roleId, sessionToken, getAccountsListByRoleId]);
 
-  // Lấy danh sách tài khoản theo roleId từ context
-  const employers = accountsList[roleId] || []; // Sửa từ 'candidates' thành 'employers'
+  const employers = accountsList[roleId] || [];
 
-  // Hàm lọc nhà tuyển dụng
   const filteredEmployers = employers.filter((employer) => {
     const matchesSearchTerm =
       employer.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -36,12 +35,33 @@ export default function EmployerManagementPage({
     return matchesSearchTerm && matchesFilterStatus;
   });
 
+  const handleUpdateIsActive = async (username: string, isActive: boolean) => {
+    if (!sessionToken) {
+      console.error("Session token không tồn tại hoặc không hợp lệ.");
+      return;
+    }
+
+    try {
+      await authApiRequest.updateIsActive(username, isActive, sessionToken);
+      
+      const updatedEmployers = employers.map((employer) =>
+        employer.username === username
+          ? { ...employer, active: isActive }
+          : employer
+      );
+
+      const updatedAccountsList = { ...accountsList, [roleId]: updatedEmployers };
+      setAccountsList(updatedAccountsList);
+    } catch (error) {
+      console.error("Có lỗi xảy ra khi cập nhật trạng thái:", error);
+    }
+  };
+
   return (
     <div className="flex bg-gray-200">
       <div className="container mx-auto p-6">
         <div className="bg-gradient-to-r from-blue-600 to-blue-400 shadow-lg rounded-lg p-6 mb-8 text-white">
           <h1 className="text-3xl font-semibold">
-            {" "}
             Quản lý nhà tuyển dụng ({filteredEmployers.length})
           </h1>
         </div>
@@ -101,6 +121,9 @@ export default function EmployerManagementPage({
                         ? "bg-red-500 hover:bg-red-600"
                         : "bg-green-500 hover:bg-green-600"
                     }`}
+                    onClick={() =>
+                      handleUpdateIsActive(employer.username, !employer.active)
+                    }
                   >
                     {employer.active === true ? (
                       <>
