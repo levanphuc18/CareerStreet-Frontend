@@ -158,7 +158,7 @@ export default function JobsPage({
                   <td className="py-2 px-4">{job.views}</td>
                   <td className="py-2 px-4">
                     <Link
-                      href={`/employer/jobs/edit/${job.jobId}`}
+                      href={`/employer/jobs/${job.jobId}/edit`}
                       className="text-blue-500 hover:underline"
                     >
                       Sửa

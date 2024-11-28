@@ -31,7 +31,9 @@ const jobApiRequest ={
       if(filter.jobType) queryParams.append('jobType', filter.jobType);
       if (filter.jobRank) queryParams.append('jobRank', filter.jobRank);
      return   http.get <JobResType> (`/job/filler? ${queryParams.toString()}`);
-     }
+     },
+    updateJob: (jobId: number, body: FormData) =>
+      http.put<JobResType>(`/job/update/${jobId}`, body),
         
 }
 export default jobApiRequest
