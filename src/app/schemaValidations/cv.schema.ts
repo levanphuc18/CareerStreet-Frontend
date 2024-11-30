@@ -13,7 +13,8 @@ export const Cv = z.object({
   title: z.string(),             // Chức danh hiện tại
   currentSalary: z.string(),     // Mức lương hiện tại
   preferenceSalary: z.string(),  // Mức lương mong muốn
-  level: z.string(),             // Cấp độ
+  levelId: z.number(),      // ID cấp độ
+  levelName: z.string(),
   positionType: z.string(),      // Loại vị trí (toàn thời gian, bán thời gian, etc.)
   workLocation: z.string(),      // Địa điểm làm việc mong muốn
   filePath: z.string(),          // Đường dẫn file đã tải lên
@@ -32,7 +33,8 @@ export const CvCreateBody = z.object({
   title: z.string(),            // Chức danh hiện tại
   currentSalary: z.string(),    // Mức lương hiện tại
   preferenceSalary: z.string(),  // Mức lương mong muốn
-  level: z.string(),            // Cấp độ
+  levelId: z.number(),      // ID cấp độ
+  levelName: z.string(),
   positionType: z.string(),     // Loại vị trí (toàn thời gian, bán thời gian, etc.)
   workLocation: z.string(),     // Địa điểm làm việc mong muốn
   file: z.union([z.instanceof(File), z.string()]), // File đính kèm (File hoặc string)

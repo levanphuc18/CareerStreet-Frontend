@@ -72,7 +72,7 @@ export default function DetailCvPage({ cv }: { cv: CvResType["data"] | null }) {
                 VND
               </p>
               <p>
-                <strong>Cấp bậc mong muốn:</strong> {cv?.level}
+                <strong>Cấp bậc mong muốn:</strong> {cv?.levelName}
               </p>
               <p>
                 <strong>Loại hình công việc:</strong> {cv?.positionType}

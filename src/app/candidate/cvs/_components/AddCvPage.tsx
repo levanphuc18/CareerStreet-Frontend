@@ -7,8 +7,13 @@ import Alert from "@/components/Alert";
 // import { CvCreateBodyType } from "../../schemaValidations/cv.schema";
 import cvApiRequest from "@/app/apiRequest/cv";
 import PdfViewer from "@/components/PdfViewer";
+import { LevelListResType } from "@/app/schemaValidations/job.schema";
 
-export default function AddCvPage() {
+export default function AddCvPage({
+  levelList,
+}: {
+  levelList: LevelListResType["data"] | null;
+}) {
   const [formData, setFormData] = useState({
     fullName: "",
     address: "",
@@ -20,7 +25,7 @@ export default function AddCvPage() {
     title: "",
     currentSalary: "",
     preferenceSalary: "",
-    level: "",
+    levelId: 0,
     positionType: "",
     workLocation: "",
     file: null as File | null,
@@ -81,7 +86,7 @@ export default function AddCvPage() {
       title,
       currentSalary,
       preferenceSalary,
-      level,
+      levelId,
       positionType,
       workLocation,
       file,
@@ -103,7 +108,8 @@ export default function AddCvPage() {
       formErrors.currentSalary = "Lương hiện tại không được để trống.";
     if (!preferenceSalary)
       formErrors.preferenceSalary = "Lương mong muốn không được để trống.";
-    if (!level) formErrors.level = "Cấp độ nghề nghiệp không được để trống.";
+    if (!levelId)
+      formErrors.levelId = "Cấp độ nghề nghiệp không được để trống.";
     if (!positionType)
       formErrors.positionType = "Loại hình công việc không được để trống.";
     if (!workLocation)
@@ -141,7 +147,7 @@ export default function AddCvPage() {
                 title: formData.title,
                 currentSalary: formData.currentSalary,
                 preferenceSalary: formData.preferenceSalary,
-                level: formData.level,
+                levelId: formData.levelId,
                 positionType: formData.positionType,
                 workLocation: formData.workLocation,
                 candidate_id: formData.candidate_id,
@@ -415,20 +421,29 @@ export default function AddCvPage() {
 
             <div className="mb-5 border p-4 rounded-md">
               <label
-                htmlFor="level"
+                htmlFor="levelId"
                 className="mb-3 block text-xs font-medium text-[#07074D]"
               >
                 Mức kinh nghiệm:
               </label>
-              <input
-                id="level"
-                name="level"
-                type="text"
-                value={formData.level} // Thêm value cho trường này
-                onChange={handleChange} // Thêm onChange để cập nhật formData
-                placeholder="Senior"
+              <select
+                id="levelId"
+                name="levelId"
+                value={formData.levelId} // Liên kết giá trị từ formData
+                onChange={handleChange} // Cập nhật giá trị khi thay đổi
                 className="w-full rounded-md border border-[#e0e0e0] bg-white py-2 px-4 text-xs font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md"
-              />
+              >
+                <option value="">Chọn mức kinh nghiệm</option>
+                {levelList && levelList.length > 0 ? (
+                  levelList.map((level) => (
+                    <option key={level.levelId} value={level.levelId}>
+                      {level.name}
+                    </option>
+                  ))
+                ) : (
+                  <option value="">Không có dữ liệu cấp độ</option>
+                )}
+              </select>
               {errors.level && (
                 <span className="text-red-500 text-sm">{errors.level}</span>
               )}
@@ -441,15 +456,20 @@ export default function AddCvPage() {
               >
                 Hình thức làm việc:
               </label>
-              <input
-                id="positionType"
-                name="positionType" // Đã thay đổi thành positionType
-                type="text"
-                value={formData.positionType} // Thêm value cho trường này
-                onChange={handleChange} // Thêm onChange để cập nhật formData
-                placeholder="Full-time"
-                className="w-full rounded-md border border-[#e0e0e0] bg-white py-2 px-4 text-xs font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md"
-              />
+              <select
+                className="w-3/4 p-2 border border-gray-300 rounded"
+                id="positionType" // Đặt id cho trường chọn
+                name="positionType" // Đặt tên cho trường chọn
+                value={formData.positionType} // Đảm bảo giá trị hiện tại được lấy từ formData
+                onChange={handleChange} // Cập nhật giá trị khi thay đổi lựa chọn
+              >
+                <option value="">Chọn hình thức làm việc</option>
+                <option value="Toàn thời gian">Toàn thời gian</option>
+                <option value="Bán thời gian">Bán thời gian</option>
+                <option value="Thực tập">Thực tập</option>
+                <option value="Freelance">Freelance</option>
+                <option value="Remote">Remote</option>
+              </select>
               {errors.positionType && (
                 <span className="text-red-500 text-sm">
                   {errors.positionType}

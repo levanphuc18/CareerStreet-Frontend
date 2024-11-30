@@ -715,6 +715,13 @@ export default function AddJobPage({
                 <option value="Nhân viên">Nhân viên</option>
                 <option value="Quản lý">Quản lý</option>
                 <option value="Giám đốc">Giám đốc</option>
+                <option value="Trưởng phòng">Trưởng phòng</option>
+                <option value="Phó giám đốc">Phó giám đốc</option>
+                <option value="Giám đốc điều hành">Giám đốc điều hành</option>
+                <option value="Chuyên gia">Chuyên gia</option>
+                <option value="Tư vấn">Tư vấn</option>
+                <option value="Lãnh đạo">Lãnh đạo</option>
+                <option value="Giám sát">Giám sát</option>
               </select>
               {errors.jobRank && (
                 <span className="text-red-500 text-sm">{errors.jobRank}</span>
@@ -735,6 +742,8 @@ export default function AddJobPage({
                 <option value="Toàn thời gian">Toàn thời gian</option>
                 <option value="Bán thời gian">Bán thời gian</option>
                 <option value="Thực tập">Thực tập</option>
+                <option value="Freelance">Freelance</option>
+                <option value="Remote">Remote</option>
               </select>
               {errors.jobType && (
                 <span className="text-red-500 text-sm">{errors.jobType}</span>
